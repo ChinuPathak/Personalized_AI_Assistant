@@ -1,3 +1,5 @@
+import type { Session } from "./chat";
+
 export interface User {
     user_id: number;
     name: string;
@@ -12,6 +14,7 @@ export interface LoginRequest {
 export interface LoginResponse {
     message: string;
     user: User;
+    session: Session;
 }
 
 export interface SignupRequest {

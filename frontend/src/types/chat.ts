@@ -15,8 +15,8 @@ export interface CreateSessionRequest {
 }
 
 export interface CreateSessionResponse {
-    sessionId: number;
     message: string;
+    session: Session;
 }
 
 export interface ChatMessage {

@@ -14,17 +14,26 @@ import {
     Alert
 } from "../../components";
 
-import { useAuth } from "../../hooks";
+import { useAuthStore } from "../../store/authStore";
 
 const RegisterPage = () => {
     const navigate = useNavigate();
 
-    const {
-        signup,
-        loading,
-        error,
-        clearError,
-    } = useAuth();
+    const signup = useAuthStore(
+        (state) => state.signup
+    );
+
+    const loading = useAuthStore(
+        (state) => state.loading
+    );
+
+    const error = useAuthStore(
+        (state) => state.error
+    );
+
+    const clearError = useAuthStore(
+        (state) => state.clearError
+    );
 
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");

@@ -15,13 +15,12 @@ import type {
 export const createSession = async (
     payload: CreateSessionRequest
 ): Promise<CreateSessionResponse> => {
-    const { data } =
-        await api.post<CreateSessionResponse>(
-            "/sessions",
-            payload
-        );
+    const response = await api.post(
+        "/sessions",
+        payload
+    );
 
-    return data;
+    return response.data;
 };
 
 /**

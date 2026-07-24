@@ -2,12 +2,12 @@ import { useEffect } from "react";
 
 import { AppRoutes } from "./routes";
 
-import { useAuth } from "./hooks";
+import { useAuthStore } from "./store/authStore";
 
 const App = () => {
-    const {
-        initializeAuth,
-    } = useAuth();
+    const initializeAuth = useAuthStore(
+        (state) => state.initializeAuth
+    );
 
     useEffect(() => {
         initializeAuth();

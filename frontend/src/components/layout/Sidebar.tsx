@@ -6,28 +6,62 @@ import {
     MessageSquarePlus,
     UserCircle2,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
-interface ChatSession {
-    id: number;
-    title: string;
-}
+import { useAuthStore } from "../../store/authStore";
+import { useChatStore } from "../../store/chatStore";
 
-interface SidebarProps {
-    sessions?: ChatSession[];
-    activeSessionId?: number;
-    onSessionSelect?: (id: number) => void;
-    onNewChat?: () => void;
-    onLogout?: () => void;
-}
-
-const Sidebar = ({
-    sessions = [],
-    activeSessionId,
-    onSessionSelect,
-    onNewChat,
-    onLogout,
-}: SidebarProps) => {
+const Sidebar = () => {
     const [collapsed, setCollapsed] = useState(false);
+
+    const navigate = useNavigate();
+
+    // Auth Store
+    const user = useAuthStore((state) => state.user);
+    const logout = useAuthStore((state) => state.logout);
+
+    // Chat Store
+    const sessions = useChatStore(
+        (state) => state.sessions
+    );
+
+    const currentSession = useChatStore(
+        (state) => state.currentSession
+    );
+
+    const createNewSession = useChatStore(
+        (state) => state.createNewSession
+    );
+
+    const selectSession = useChatStore(
+        (state) => state.selectSession
+    );
+
+    const reset = useChatStore(
+        (state) => state.reset
+    );
+
+    const handleLogout = () => {
+        reset();
+        logout();
+
+        navigate("/login", {
+            replace: true,
+        });
+    };
+
+    const handleNewChat = async () => {
+        if (!user) return;
+
+        try {
+            console.log("Before:", useChatStore.getState().currentSession);
+            await createNewSession(user.user_id);
+            console.log("After:", useChatStore.getState().currentSession);
+            console.log("New session created");
+        } catch (error) {
+            console.error("Unable to create chat session", error);
+        }
+    };
 
     return (
         <aside
@@ -58,7 +92,7 @@ const Sidebar = ({
             {/* New Chat */}
             <div className="p-4">
                 <button
-                    onClick={onNewChat}
+                    onClick={handleNewChat}
                     className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 font-medium text-white transition hover:bg-blue-700"
                 >
                     <MessageSquarePlus size={20} />
@@ -71,10 +105,10 @@ const Sidebar = ({
             <div className="flex-1 overflow-y-auto px-2">
                 {sessions.map((session) => (
                     <button
-                        key={session.id}
-                        onClick={() => onSessionSelect?.(session.id)}
+                        key={session.session_id}
+                        onClick={() => selectSession(session)}
                         className={`mb-2 flex w-full items-center rounded-xl px-3 py-3 text-left transition ${
-                            activeSessionId === session.id
+                            currentSession?.session_id === session.session_id
                                 ? "bg-slate-700 text-white"
                                 : "text-slate-300 hover:bg-slate-800"
                         }`}
@@ -107,18 +141,18 @@ const Sidebar = ({
                     {!collapsed && (
                         <div>
                             <p className="font-medium text-white">
-                                User
+                                {user?.name ?? "Guest"}
                             </p>
 
                             <p className="text-xs text-slate-400">
-                                AI Assistant
+                                {user?.email ?? ""}
                             </p>
                         </div>
                     )}
                 </div>
 
                 <button
-                    onClick={onLogout}
+                    onClick={handleLogout}
                     className="flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-slate-300 transition hover:bg-red-500 hover:text-white"
                 >
                     <LogOut size={18} />

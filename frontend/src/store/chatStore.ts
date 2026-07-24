@@ -33,6 +33,10 @@ interface ChatState {
 
     error: string | null;
 
+    setCurrentSession: (
+        session: Session
+    ) => void;
+
     createNewSession: (
         userId: number
     ) => Promise<void>;
@@ -90,6 +94,24 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
     error: null,
 
+    setCurrentSession: (session) => {
+
+        set({
+
+            currentSession: session,
+
+            messages: [],
+
+            transcript: "",
+
+            selectedFile: null,
+
+            error: null,
+
+        });
+
+    },
+
     createNewSession: async (userId) => {
 
         set((state) => ({
@@ -107,13 +129,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
                     user_id: userId,
                 });
 
-            const session: Session = {
-                session_id: response.sessionId,
-                user_id: userId,
-                title: "New Chat",
-                status: "EMPTY",
-                created_at: new Date().toISOString(),
-            };
+            const session = response.session;
 
             set((state) => ({
                 currentSession: session,

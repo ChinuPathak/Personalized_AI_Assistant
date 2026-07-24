@@ -2,6 +2,7 @@ import { create } from "zustand";
 import axios from "axios";
 
 import { login, signup } from "../api/auth";
+import { useChatStore } from "./chatStore";
 
 import type {
     LoginRequest,
@@ -72,6 +73,10 @@ export const useAuthStore = create<AuthState>((set) => ({
 
         try {
             const response = await login(payload);
+
+            useChatStore
+                .getState()
+                .setCurrentSession(response.session);
 
             localStorage.setItem(
                 "user",

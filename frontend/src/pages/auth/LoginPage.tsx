@@ -10,17 +10,26 @@ import {
     Alert
 } from "../../components";
 
-import { useAuth } from "../../hooks";
+import { useAuthStore } from "../../store/authStore";
 
 const LoginPage = () => {
     const navigate = useNavigate();
 
-    const {
-        login,
-        loading,
-        error,
-        clearError,
-    } = useAuth();
+    const login = useAuthStore(
+        (state) => state.login
+    );
+
+    const loading = useAuthStore(
+        (state) => state.loading
+    );
+
+    const error = useAuthStore(
+        (state) => state.error
+    );
+
+    const clearError = useAuthStore(
+        (state) => state.clearError
+    );
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
