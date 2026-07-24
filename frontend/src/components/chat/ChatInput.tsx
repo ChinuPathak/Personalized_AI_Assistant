@@ -1,31 +1,54 @@
 import { useRef, useState } from "react";
 import { Mic, Paperclip, SendHorizontal } from "lucide-react";
+import { useChatStore } from "../../store/chatStore";
+import { useAuthStore } from "../../store/authStore";
 
 import { Button, TextArea } from "../ui";
 
-interface ChatInputProps {
-    onSend: (message: string) => void;
-    onFileSelect?: (file: File) => void;
-    onVoiceClick?: () => void;
-    loading?: boolean;
-}
+const ChatInput = () => {
+    const user = useAuthStore(
+        (state) => state.user
+    );
 
-const ChatInput = ({
-    onSend,
-    onFileSelect,
-    onVoiceClick,
-    loading = false,
-}: ChatInputProps) => {
+    const loading = useChatStore(
+        (state) => state.loading.generate
+    );
+
+    const sendMessage = useChatStore(
+        (state) => state.sendMessage
+    );
+
+    const uploadFile = useChatStore(
+        (state) => state.uploadFile
+    );
+
+    const currentSession = useChatStore(
+        (state) => state.currentSession
+    );
+
+    const startVoiceRecording =
+        useChatStore(
+            (state) =>
+                state.startVoiceRecording
+        );
+    
     const [message, setMessage] = useState("");
 
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleSend = () => {
+        console.log("Current Session:", currentSession);
         const trimmedMessage = message.trim();
+
+        console.log("Send clicked:", trimmedMessage);
 
         if (!trimmedMessage || loading) return;
 
-        onSend(trimmedMessage);
+        console.log(
+            "ChatInput Current Session:",
+            useChatStore.getState().currentSession
+        );
+        void sendMessage(trimmedMessage);
         setMessage("");
     };
 
@@ -36,7 +59,9 @@ const ChatInput = ({
 
         if (!file) return;
 
-        onFileSelect?.(file);
+        if (user) {
+            void uploadFile(user.user_id, file);
+        }
 
         event.target.value = "";
     };
@@ -78,7 +103,13 @@ const ChatInput = ({
                             <Button
                                 type="button"
                                 variant="secondary"
-                                onClick={onVoiceClick}
+                                onClick={() => {
+                                    if (user) {
+                                        void startVoiceRecording(
+                                            user.user_id
+                                        );
+                                    }
+                                }}
                                 disabled={loading}
                             >
                                 <Mic size={18} />

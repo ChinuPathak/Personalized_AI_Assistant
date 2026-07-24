@@ -23,6 +23,7 @@ from responseGenerationPrompt import response_Generation_Prompt
 from database import create_tables, get_db_connection
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from pinecone import Pinecone
+from datetime import datetime
 
 load_dotenv()
 create_tables()
@@ -160,6 +161,7 @@ def login(request: LoginRequest):
             )
 
         session_id = create_session(conn , cur , user_id)
+        created_at = datetime.now().isoformat()
 
         conn.commit()
 
@@ -172,8 +174,10 @@ def login(request: LoginRequest):
             },
             "session": {
                 "session_id": session_id,
+                "user_id": user_id,
                 "title": "New Chat",
-                "status": "EMPTY"
+                "status": "EMPTY",
+                "created_at": created_at
             }
         }
 
@@ -195,10 +199,20 @@ def sessions(request: sessionRequest):
     user_id = request.user_id
     sessionId = create_session(conn , cur , user_id)
     print("sessionId>>>>>>>>>>>>>>>>>>>>>" , sessionId)
+    created_at = datetime.now().isoformat()
     conn.commit()
     cur.close()
     conn.close()
-    return {"sessionId" : sessionId , "message" : "Session created successfully"}
+    return {
+        "message": "Session created",
+        "session": {
+            "session_id": sessionId,
+            "user_id": user_id,
+            "title": "New Chat",
+            "status": "EMPTY",
+            "created_at": created_at
+        }
+    }
 
 
 @app.get("/session/{id}")
@@ -312,12 +326,13 @@ async def docUpload(userId: int, sessionId: int , file: UploadFile = File(...)):
     doc_embeddings = []
 
     for i , doc in enumerate(splitDocs):
-        response = model.embed_content(
-            model="gemini-embedding-001",
-            contents=doc.page_content
+        response = genai.embed_content(
+            model="models/gemini-embedding-001",
+            content=doc.page_content,
+            task_type="retrieval_document"
         )
 
-        embedding = response.embeddings[0].values
+        embedding = response["embedding"]
         doc_embeddings.append(embedding)
         insert_query = """
         INSERT INTO document_chunks(document_id , chunk_number , chunk_text)
@@ -450,11 +465,13 @@ def generateResponse(request: GenerateRequest):
     WHERE session_id = %s
     """
     cur.execute(update_statusQuery, (status , sessionId))
-    response = model.embed_content(
-        model="gemini-embedding-001",
-        contents=query
+    response = genai.embed_content(
+        model="models/gemini-embedding-001",
+        content=query,
+        task_type="retrieval_query"
     )
-    embeddedQuery = response.embeddings[0].values
+
+    embeddedQuery = response["embedding"]
 
     insert_query = """
     INSERT INTO chat_history(session_id , role , message)

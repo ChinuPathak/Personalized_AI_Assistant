@@ -1,14 +1,14 @@
 import { useEffect, useRef } from "react";
-import type { ChatMessage } from "../../types/chat";
+
+import { useChatStore } from "../../store/chatStore";
+
 import MessageBubble from "./MessageBubble";
 
-interface MessageListProps {
-    messages: ChatMessage[];
-}
+const MessageList = () => {
+    const messages = useChatStore(
+        (state) => state.messages
+    );
 
-const MessageList = ({
-    messages,
-}: MessageListProps) => {
     const bottomRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
