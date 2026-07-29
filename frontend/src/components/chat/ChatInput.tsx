@@ -1,17 +1,30 @@
 import { useRef, useState } from "react";
-import { Mic, Paperclip, SendHorizontal } from "lucide-react";
+import {
+    Mic,
+    Paperclip,
+    SendHorizontal,
+    FileText,
+    X,
+} from "lucide-react";
+
 import { useChatStore } from "../../store/chatStore";
 import { useAuthStore } from "../../store/authStore";
 
 import { Button, TextArea } from "../ui";
 
 const ChatInput = () => {
-    const user = useAuthStore(
-        (state) => state.user
-    );
+    const user = useAuthStore((state) => state.user);
 
     const loading = useChatStore(
         (state) => state.loading.generate
+    );
+
+    const uploading = useChatStore(
+        (state) => state.loading.upload
+    );
+
+    const recording = useChatStore(
+        (state) => state.loading.voice
     );
 
     const sendMessage = useChatStore(
@@ -22,34 +35,32 @@ const ChatInput = () => {
         (state) => state.uploadFile
     );
 
-    const currentSession = useChatStore(
-        (state) => state.currentSession
+    const selectedFile = useChatStore(
+        (state) => state.selectedFile
     );
 
-    const startVoiceRecording =
-        useChatStore(
-            (state) =>
-                state.startVoiceRecording
-        );
-    
+    const setSelectedFile = useChatStore(
+        (state) => state.setSelectedFile
+    );
+
+    const startVoiceRecording = useChatStore(
+        (state) => state.startVoiceRecording
+    );
+
     const [message, setMessage] = useState("");
 
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleSend = () => {
-        console.log("Current Session:", currentSession);
         const trimmedMessage = message.trim();
-
-        console.log("Send clicked:", trimmedMessage);
 
         if (!trimmedMessage || loading) return;
 
-        console.log(
-            "ChatInput Current Session:",
-            useChatStore.getState().currentSession
-        );
         void sendMessage(trimmedMessage);
+
         setMessage("");
+
+        useChatStore.getState().setTranscript("");
     };
 
     const handleFileChange = (
@@ -67,73 +78,124 @@ const ChatInput = () => {
     };
 
     return (
-        <div className="border-t border-slate-800 bg-slate-900 px-6 py-5">
-            <div className="mx-auto max-w-4xl">
-                <div className="rounded-3xl border border-slate-700 bg-slate-800 p-3 shadow-lg">
-                    <TextArea
-                        value={message}
-                        placeholder="Ask anything..."
-                        disabled={loading}
-                        onChange={(e) => setMessage(e.target.value)}
-                        onEnterPress={handleSend}
-                        className="border-none bg-transparent focus:ring-0"
-                    />
+        <div className="mx-auto w-full max-w-4xl px-6 py-4">
 
-                    <div className="mt-3 flex items-center justify-between">
-                        {/* Left Actions */}
-                        <div className="flex items-center gap-2">
-                            <input
-                                ref={fileInputRef}
-                                type="file"
-                                className="hidden"
-                                onChange={handleFileChange}
-                            />
+                <div className="rounded-[28px] border border-slate-700 bg-slate-900 shadow-xl">
 
-                            <Button
-                                type="button"
-                                variant="secondary"
-                                onClick={() =>
-                                    fileInputRef.current?.click()
-                                }
-                                disabled={loading}
-                            >
-                                <Paperclip size={18} />
-                            </Button>
+                    {/* Uploaded File */}
+                    {selectedFile && (
+                        <div className="px-5 pt-4">
+                            <div className="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-800 px-3 py-2">
+                                <FileText
+                                    size={15}
+                                    className="text-blue-400"
+                                />
 
-                            <Button
-                                type="button"
-                                variant="secondary"
-                                onClick={() => {
-                                    if (user) {
-                                        void startVoiceRecording(
-                                            user.user_id
-                                        );
+                                <span className="max-w-[220px] truncate text-sm text-slate-200">
+                                    {selectedFile.name}
+                                </span>
+
+                                <button
+                                    onClick={() =>
+                                        setSelectedFile(null)
                                     }
-                                }}
-                                disabled={loading}
+                                    className="rounded-full p-1 transition hover:bg-slate-700 hover:text-red-400"
+                                >
+                                    <X size={14} />
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Upload Status */}
+                    {uploading && (
+                        <div className="px-5 pt-4 text-sm text-blue-400">
+                            Uploading document...
+                        </div>
+                    )}
+
+                    {/* Recording */}
+                    {recording && (
+                        <div className="flex items-center gap-2 px-5 pt-4 text-sm text-red-400 animate-pulse">
+                            <Mic size={16} />
+                            Recording...
+                        </div>
+                    )}
+
+                    {/* Composer */}
+                    <div className="px-5 pt-4 pb-3">
+
+                        <TextArea
+                            minimal
+                            value={message}
+                            placeholder="Ask anything..."
+                            disabled={loading}
+                            onChange={(e) => setMessage(e.target.value)}
+                            onEnterPress={handleSend}
+                            className="min-h-[28px] text-base placeholder:text-slate-500"
+                        />
+
+                        <div className="mt-4 flex items-center justify-between">
+
+                            <div className="flex items-center gap-2">
+
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    accept=".pdf,.doc,.docx,.txt"
+                                    className="hidden"
+                                    onChange={handleFileChange}
+                                />
+
+                                <Button
+                                    type="button"
+                                    variant="secondary"
+                                    onClick={() => fileInputRef.current?.click()}
+                                    disabled={loading}
+                                    className="h-10 w-10 rounded-full !p-0"
+                                >
+                                    <Paperclip className="text-white" size={18} />
+                                </Button>
+
+                                <Button
+                                    type="button"
+                                    variant="secondary"
+                                    onClick={async () => {
+                                        if (!user) return;
+
+                                        await startVoiceRecording(user.user_id);
+
+                                        const transcript =
+                                            useChatStore.getState().transcript;
+
+                                        if (transcript) {
+                                            setMessage(transcript);
+                                        }
+                                    }}
+                                    disabled={loading}
+                                    className="h-10 w-10 rounded-full !p-0"
+                                >
+                                    <Mic className="text-white" size={18} />
+                                </Button>
+                            </div>
+
+                            <Button
+                                type="button"
+                                onClick={handleSend}
+                                loading={loading}
+                                disabled={!message.trim()}
+                                className="h-10 w-10 rounded-full !p-0"
                             >
-                                <Mic size={18} />
+                                <SendHorizontal className="text-white" size={18} />
                             </Button>
                         </div>
-
-                        {/* Send Button */}
-                        <Button
-                            type="button"
-                            onClick={handleSend}
-                            loading={loading}
-                            disabled={!message.trim()}
-                        >
-                            <SendHorizontal size={18} />
-                        </Button>
                     </div>
                 </div>
 
-                <p className="mt-3 text-center text-xs text-slate-500">
-                    AI can make mistakes. Verify important information before
-                    relying on it.
+                <p className="mt-2 text-center text-[11px] text-slate-500">
+                    AI can make mistakes. Verify important information before relying on it.
                 </p>
             </div>
-        </div>
     );
 };
 

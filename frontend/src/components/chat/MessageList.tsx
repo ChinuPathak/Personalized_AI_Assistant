@@ -19,16 +19,14 @@ const MessageList = () => {
 
     return (
         <div className="flex h-full flex-col overflow-y-auto px-6 py-6">
-            <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
+            <div className="mx-auto flex w-full max-w-4xl flex-col gap-5 px-6">
                 {messages.map((message) => (
                     <MessageBubble
-                        key={
-                            message.chat_id ??
-                            `${message.session_id}-${message.created_at}`
-                        }
+                        key={message.id}
                         role={message.role}
                         message={message.message}
                         created_at={message.created_at}
+                        loading={message.loading}
                     />
                 ))}
 

@@ -24,58 +24,68 @@ const MessageBubble = ({
             }`}
         >
             <div
-                className={`flex max-w-3xl items-start gap-3 ${
-                    isUser ? "flex-row-reverse" : ""
+                className={`flex items-end gap-3 ${
+                    isUser ? "max-w-[75%] flex-row-reverse" : "w-full max-w-[90%]"
                 }`}
             >
                 {/* Avatar */}
                 <div
-                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${
+                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
                         isUser
                             ? "bg-blue-600"
                             : "bg-slate-700"
                     }`}
                 >
                     {isUser ? (
-                        <User className="h-5 w-5 text-white" />
+                        <User className="h-[18px] w-[18px] text-white" />
                     ) : (
-                        <Bot className="h-5 w-5 text-white" />
+                        <Bot className="h-[18px] w-[18px] text-white" />
                     )}
                 </div>
 
                 {/* Message Bubble */}
                 <div
-                    className={`rounded-2xl px-5 py-4 shadow-sm ${
+                    className={`rounded-2xl shadow-sm transition-all ${
                         isUser
-                            ? "rounded-tr-md bg-blue-600 text-white"
-                            : "rounded-tl-md border border-slate-700 bg-slate-800 text-slate-100"
+                            ? "w-fit max-w-full rounded-tr-lg bg-blue-600 px-4 py-3 text-white"
+                            : "w-full rounded-tl-lg border border-slate-700 bg-slate-800 px-5 py-4 text-slate-100"
                     }`}
                 >
                     {loading ? (
-                        <div className="flex items-center gap-1">
-                            <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400"></span>
-                            <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400 [animation-delay:0.2s]"></span>
-                            <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400 [animation-delay:0.4s]"></span>
+                        <div className="flex flex-col gap-3">
+
+                            <div className="text-sm font-medium text-slate-400">
+                                Thinking...
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                                <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-blue-400"></span>
+                                <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-blue-400 [animation-delay:0.15s]"></span>
+                                <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-blue-400 [animation-delay:0.3s]"></span>
+                            </div>
+
                         </div>
                     ) : (
-                        <p className="whitespace-pre-wrap break-words text-sm leading-7">
+                        <p className="whitespace-pre-wrap break-words text-base leading-7">
                             {message}
                         </p>
                     )}
 
-                    {created_at && (
-                        <p
-                            className={`mt-3 text-xs ${
-                                isUser
-                                    ? "text-blue-100"
-                                    : "text-slate-400"
-                            }`}
-                        >
-                            {new Date(created_at).toLocaleTimeString([], {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                            })}
-                        </p>
+                    {!loading && created_at &&  (
+                        <div className="mt-2 flex justify-end">
+                            <span
+                                className={`text-[11px] ${
+                                    isUser
+                                        ? "text-blue-100"
+                                        : "text-slate-400"
+                                }`}
+                            >
+                                {new Date(created_at).toLocaleTimeString([], {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                })}
+                            </span>
+                        </div>
                     )}
                 </div>
             </div>

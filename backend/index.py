@@ -214,6 +214,17 @@ def sessions(request: sessionRequest):
         }
     }
 
+@app.get("/chat/sessions/{userId}")
+def getSessionData(userId : int):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    select_query = """
+    SELECT * FROM chat_sessions
+    WHERE user_id = %s
+    """
+    cur.execute(select_query,(userId ,))
+    session = cur.fetchone()
+
 
 @app.get("/session/{id}")
 def dataBasedOnSessionId(id : int):

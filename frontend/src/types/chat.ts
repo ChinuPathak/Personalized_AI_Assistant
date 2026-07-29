@@ -20,7 +20,8 @@ export interface CreateSessionResponse {
 }
 
 export interface ChatMessage {
-    chat_id?: number;
+    id: string;               // Frontend unique id
+    chat_id?: number;         // Database id
     session_id: number;
     role: ChatRole;
     message: string;

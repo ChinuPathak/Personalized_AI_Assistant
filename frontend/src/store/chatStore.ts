@@ -95,10 +95,14 @@ export const useChatStore = create<ChatState>((set, get) => ({
     error: null,
 
     setCurrentSession: (session) => {
-
-        set({
-
+        set((state) => ({
             currentSession: session,
+
+            sessions: state.sessions.some(
+                (item) => item.session_id === session.session_id
+            )
+                ? state.sessions
+                : [session, ...state.sessions],
 
             messages: [],
 
@@ -107,9 +111,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
             selectedFile: null,
 
             error: null,
-
-        });
-
+        }));
     },
 
     createNewSession: async (userId) => {
@@ -202,16 +204,20 @@ export const useChatStore = create<ChatState>((set, get) => ({
         }
 
         const userMessage: ChatMessage = {
+            id: crypto.randomUUID(),
             session_id: session.session_id,
             role: "user",
             message: query,
+            created_at: new Date().toISOString(),
         };
 
         const loadingMessage: ChatMessage = {
+            id: crypto.randomUUID(),
             session_id: session.session_id,
             role: "assistant",
             message: "",
             loading: true,
+            created_at: new Date().toISOString(),
         };
 
         set((state) => ({
@@ -238,9 +244,12 @@ export const useChatStore = create<ChatState>((set, get) => ({
                 });
 
             const assistantMessage: ChatMessage = {
+                id: loadingMessage.id,
                 session_id: session.session_id,
                 role: "assistant",
                 message: response.response,
+                created_at: loadingMessage.created_at,
+                loading: false,
             };
 
             set((state) => ({
@@ -344,7 +353,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
             set((state) => ({
 
-                selectedFile: null,
+                selectedFile: file,
 
                 loading: {
                     ...state.loading,
