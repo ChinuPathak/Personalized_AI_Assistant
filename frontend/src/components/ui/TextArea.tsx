@@ -9,11 +9,13 @@ interface TextAreaProps
     extends TextareaHTMLAttributes<HTMLTextAreaElement> {
     error?: string;
     onEnterPress?: () => void;
+    minimal?: boolean;
 }
 
 const TextArea = ({
     error,
     onEnterPress,
+    minimal = false,
     className = "",
     value,
     onKeyDown,
@@ -58,33 +60,51 @@ const TextArea = ({
                 className={`
                     w-full
                     resize-none
-                    rounded-2xl
-                    border
+
                     ${
-                        error
-                            ? "border-red-500"
-                            : "border-slate-700"
+                        minimal
+                            ? `
+                                bg-transparent
+                                border-0
+                                rounded-none
+                                px-0
+                                py-0
+                                shadow-none
+                                focus:border-transparent
+                                focus:ring-0
+                              `
+                            : `
+                                rounded-2xl
+                                border
+                                ${
+                                    error
+                                        ? "border-red-500"
+                                        : "border-slate-700"
+                                }
+                                bg-slate-900
+                                px-4
+                                py-3
+                                focus:border-blue-500
+                                focus:ring-2
+                                focus:ring-blue-500/30
+                              `
                     }
-                    bg-slate-900
-                    px-4
-                    py-3
+
                     text-white
                     placeholder:text-slate-500
                     outline-none
                     transition-all
-                    focus:border-blue-500
-                    focus:ring-2
-                    focus:ring-blue-500/30
                     disabled:cursor-not-allowed
                     disabled:opacity-60
                     overflow-y-auto
                     max-h-[220px]
+
                     ${className}
                 `}
                 {...props}
             />
 
-            {error && (
+            {!minimal && error && (
                 <p className="mt-2 text-sm text-red-400">
                     {error}
                 </p>

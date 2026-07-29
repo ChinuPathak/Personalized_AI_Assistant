@@ -5,7 +5,7 @@ interface ButtonProps
     extends ButtonHTMLAttributes<HTMLButtonElement> {
     loading?: boolean;
     fullWidth?: boolean;
-    variant?: "primary" | "secondary" | "danger";
+    variant?: "primary" | "secondary" | "danger" | "ghost";
 }
 
 const Button = ({
@@ -26,6 +26,9 @@ const Button = ({
 
         danger:
             "bg-red-600 hover:bg-red-500 text-white",
+
+        ghost:
+            "bg-transparent text-slate-400 hover:bg-slate-800 hover:text-white shadow-none",
     };
 
     return (
@@ -46,7 +49,11 @@ const Button = ({
                 transition-all
                 duration-200
 
-                shadow-lg
+                ${
+                    variant === "ghost"
+                        ? ""
+                        : "shadow-lg"
+                }
 
                 disabled:opacity-50
                 disabled:cursor-not-allowed
@@ -61,10 +68,7 @@ const Button = ({
 
                 ${className}
             `}
-            disabled={
-                loading ||
-                disabled
-            }
+            disabled={loading || disabled}
             {...props}
         >
             {loading && (
