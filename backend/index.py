@@ -214,16 +214,65 @@ def sessions(request: sessionRequest):
         }
     }
 
+
+@app.get("/chat/history/{session_id}")
+def getChatHistory(session_id : int):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        select_query = """
+        SELECT  message_id, role, message FROM chat_history
+        WHERE session_id = %s
+        """
+        cur.execute(select_query,(session_id ,))
+        rows = cur.fetchall()
+        print("rows>>>>>>>>>>>>" , rows)
+        messages = []
+        for row in rows:
+            messages.append({
+                "message_id": row[0],
+                "role" : row[1],
+                "message" : row[2]
+            })
+
+        print("messages>>>>>>>>>>>>>" , messages)
+        cur.close()
+        conn.close()
+        return {
+            "messages": messages
+        }
+    except Exception as e :
+        print("error>>>>>>>>>>>>>>>>>" , e)
+
+
 @app.get("/chat/sessions/{userId}")
 def getSessionData(userId : int):
     conn = get_db_connection()
     cur = conn.cursor()
     select_query = """
-    SELECT * FROM chat_sessions
+    SELECT session_id, title, status , created_at FROM chat_sessions
     WHERE user_id = %s
     """
     cur.execute(select_query,(userId ,))
-    session = cur.fetchone()
+    rows = cur.fetchall()
+
+    sessions = []
+
+    for row in rows:
+        sessions.append({
+            "session_id": row[0],
+            "title": row[1],
+            "status": row[2],
+            "created_at": row[3]
+        })
+
+    cur.close()
+    conn.close()
+
+    return {
+        "sessions": sessions
+    }
+
 
 
 @app.get("/session/{id}")

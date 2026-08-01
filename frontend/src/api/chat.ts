@@ -1,13 +1,21 @@
 import api from "./axios";
 
 import type {
-    ChatMessage,
     CreateSessionRequest,
     CreateSessionResponse,
     GenerateRequest,
     GenerateResponse,
     Session,
 } from "../types";
+
+
+export interface ChatHistoryResponse {
+    messages: {
+        message_id: number;
+        role: "user" | "assistant";
+        message: string;
+    }[];
+}
 
 /**
  * Create new chat session
@@ -59,14 +67,14 @@ export const getSessions = async (
  */
 export const getChatHistory = async (
     sessionId: number
-): Promise<ChatMessage[]> => {
-    const { data } =
-        await api.get<ChatMessage[]>(
-            `/chatHistory/${sessionId}`
-        );
+): Promise<ChatHistoryResponse> => {
+    const { data } = await api.get<ChatHistoryResponse>(
+        `/chat/history/${sessionId}`
+    );
 
     return data;
 };
+
 
 /**
  * Delete session

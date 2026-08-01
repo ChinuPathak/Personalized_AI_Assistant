@@ -106,7 +106,9 @@ const Sidebar = () => {
                 {sessions.map((session) => (
                     <button
                         key={session.session_id}
-                        onClick={() => selectSession(session)}
+                        onClick={() => {
+                            void selectSession(session);
+                        }}
                         className={`mb-2 flex w-full items-center rounded-xl px-3 py-3 text-left transition ${
                             currentSession?.session_id === session.session_id
                                 ? "bg-slate-700 text-white"
