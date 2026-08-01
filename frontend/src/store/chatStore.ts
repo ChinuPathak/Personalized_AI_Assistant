@@ -4,6 +4,7 @@ import axios from "axios";
 import {
     createSession,
     generateResponse,
+    getChatHistory,
 } from "../api/chat";
 
 import { uploadDocument } from "../api/document";
@@ -43,7 +44,7 @@ interface ChatState {
 
     selectSession: (
         session: Session
-    ) => void;
+    ) => Promise<void>;
 
     sendMessage: (
         query: string
@@ -177,21 +178,46 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
     },
 
-    selectSession: (session) => {
+    selectSession: async (session) => {
 
         set({
-
             currentSession: session,
-
-            messages: [],
-
             transcript: "",
-
             selectedFile: null,
-
             error: null,
-
         });
+
+        try {
+
+            const response = await getChatHistory(
+                session.session_id
+            );
+
+            const history: ChatMessage[] =
+                response.messages.map((msg) => ({
+                    id: String(msg.message_id),
+                    session_id: session.session_id,
+                    role: msg.role,
+                    message: msg.message,
+                    created_at: new Date().toISOString(),
+                }));
+
+            set({
+                messages: history,
+            });
+
+        } catch (error) {
+
+            console.error(
+                "Unable to load history",
+                error
+            );
+
+            set({
+                messages: [],
+            });
+
+        }
 
     },
 
