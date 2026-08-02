@@ -45,7 +45,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
     error: null,
 
-    initializeAuth: () => {
+    initializeAuth: async () => {
         const storedUser = localStorage.getItem("user");
 
         if (!storedUser) return;
@@ -57,6 +57,10 @@ export const useAuthStore = create<AuthState>((set) => ({
                 user,
                 isAuthenticated: true,
             });
+            // Load previous sessions
+            await useChatStore
+                .getState()
+                .loadSessions(user.user_id);
         } catch {
             localStorage.removeItem("user");
         }
@@ -74,9 +78,23 @@ export const useAuthStore = create<AuthState>((set) => ({
         try {
             const response = await login(payload);
 
-            useChatStore
-                .getState()
-                .setCurrentSession(response.session);
+            const chatStore = useChatStore.getState();
+
+            // Set the newly created session
+            chatStore.setCurrentSession(response.session);
+
+            // Load previous ACTIVE sessions
+            await chatStore.loadSessions(
+                response.user.user_id
+            );
+
+            // Add the new EMPTY session to the top if it's not already there
+            useChatStore.setState((state) => ({
+                sessions: [
+                    response.session,
+                    ...state.sessions,
+                ],
+            }));
 
             localStorage.setItem(
                 "user",

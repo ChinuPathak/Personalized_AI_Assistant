@@ -5,6 +5,7 @@ import {
     createSession,
     generateResponse,
     getChatHistory,
+    getSessions,
 } from "../api/chat";
 
 import { uploadDocument } from "../api/document";
@@ -44,6 +45,10 @@ interface ChatState {
 
     selectSession: (
         session: Session
+    ) => Promise<void>;
+
+    loadSessions: (
+        userId: number
     ) => Promise<void>;
 
     sendMessage: (
@@ -216,6 +221,27 @@ export const useChatStore = create<ChatState>((set, get) => ({
             set({
                 messages: [],
             });
+
+        }
+
+    },
+
+    loadSessions: async (userId) => {
+
+        try {
+
+            const response = await getSessions(userId);
+
+            set({
+                sessions: response.sessions,
+            });
+
+        } catch (error) {
+
+            console.error(
+                "Unable to load sessions",
+                error
+            );
 
         }
 

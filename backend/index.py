@@ -63,9 +63,6 @@ class sessionRequest(BaseModel):
 class textChatRequest(BaseModel):
     query: str
 
-class webScrapRequest(BaseModel):
-    query: str
-
 class GenerateRequest(BaseModel):
     session_id: int
     query: str
@@ -214,7 +211,6 @@ def sessions(request: sessionRequest):
         }
     }
 
-
 @app.get("/chat/history/{session_id}")
 def getChatHistory(session_id : int):
     try:
@@ -244,14 +240,14 @@ def getChatHistory(session_id : int):
     except Exception as e :
         print("error>>>>>>>>>>>>>>>>>" , e)
 
-
 @app.get("/chat/sessions/{userId}")
 def getSessionData(userId : int):
     conn = get_db_connection()
     cur = conn.cursor()
     select_query = """
-    SELECT session_id, title, status , created_at FROM chat_sessions
-    WHERE user_id = %s
+    SELECT session_id, user_id , title, status , created_at FROM chat_sessions
+    WHERE user_id = %s AND status = 'ACTIVE'
+    ORDER BY updated_at DESC;
     """
     cur.execute(select_query,(userId ,))
     rows = cur.fetchall()
@@ -261,9 +257,10 @@ def getSessionData(userId : int):
     for row in rows:
         sessions.append({
             "session_id": row[0],
-            "title": row[1],
-            "status": row[2],
-            "created_at": row[3]
+            "user_id": row[1],
+            "title": row[2],
+            "status": row[3],
+            "created_at": row[4]
         })
 
     cur.close()
@@ -272,8 +269,6 @@ def getSessionData(userId : int):
     return {
         "sessions": sessions
     }
-
-
 
 @app.get("/session/{id}")
 def dataBasedOnSessionId(id : int):
@@ -463,10 +458,8 @@ def get_top_urls(query, num_results=3):
         # Safely extract the 'href' (URL) from the result dictionaries
         return [item['href'] for item in results if 'href' in item]
 
-# webScraping will be used when the document data is not present in the db to answer the query
-@app.post("/webScrape")
-def webScrape(request: webScrapRequest):
-    query = request.query
+
+async def webScrape(query : str):
     print("query>>>>>>>>>>>>>>" , query)
     top_urls = get_top_urls(query, 3)
     print("top urls>>>>>>>>>>>>>>>>>>",top_urls)
@@ -479,24 +472,24 @@ def webScrape(request: webScrapRequest):
         soup_data = BeautifulSoup(res.text , "html.parser")
         # print(soup_data.title)
         print("/n")
-        paragraphs = soup_data.find_all('p')
-        print("paragraph>>>>>>>>>>>>>>>" , paragraphs)
-        # text = "\n".join(
-        #     p.get_text(strip=True)
-        #     for p in paragraphs
-        #         if p.get_text(strip=True)  # Skip empty paragraphs
-        # )
-        # print("text>>>>>>>>>>>>>" , text)
-        # content.append(text)
-        content.append(paragraphs)
+        paragraphs = soup_data.find_all("p")
+
+        text = "\n".join(
+            p.get_text(strip=True)
+            for p in paragraphs
+            if p.get_text(strip=True)
+        )
+
+        content.append(text)
     
     print("content>>>>>>>>>>>>>>>>" , content)
-    prompt = web_Scraping_Prompt(content)
+    prompt = web_Scraping_Prompt(query , content)
     response = model.generate_content(prompt)
     print("response>>>>>>>>>>>>>>>>>>>>" , response.text)
+    return response.text
 
 @app.post("/generate")
-def generateResponse(request: GenerateRequest):
+async def generateResponse(request: GenerateRequest):
     conn = get_db_connection()
     cur = conn.cursor()
     status = "ACTIVE"
@@ -572,15 +565,24 @@ def generateResponse(request: GenerateRequest):
     prompt = response_Generation_Prompt(query , reverseMessages , relevant_chunks)
     response = model.generate_content(prompt)
     print("response>>>>>>>>>>>>>>>>>>" , response.text)
-    llm_response = """
-    INSERT INTO chat_history(session_id , role , message)
-    VALUES (%s,%s,%s) 
+    assistant_response = response.text
+
+    if assistant_response.strip() == "WEB_SEARCH_REQUIRED":
+        print("Performing Web Search...")
+        assistant_response = await webScrape(query)
+        print("assistant_response>>>>>>>>>>>>>>>>>" , assistant_response)
+
+    insert_query = """
+    INSERT INTO chat_history(session_id, role, message)
+    VALUES (%s, %s, %s)
     """
-    cur.execute(llm_response,(sessionId , "assistant" , response.text))
+
+    cur.execute(insert_query,(sessionId, "assistant", assistant_response))
+        
     conn.commit()
 
     cur.close()
     conn.close()
     return {
-        "response": response.text
+        "response": assistant_response
     }
