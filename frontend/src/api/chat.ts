@@ -52,10 +52,10 @@ export const generateResponse = async (
  */
 export const getSessions = async (
     userId: number
-): Promise<Session[]> => {
+): Promise<{ sessions: Session[] }> => {
     const { data } =
-        await api.get<Session[]>(
-            `/sessions/${userId}`
+        await api.get(
+            `/chat/sessions/${userId}`
         );
 
     return data;

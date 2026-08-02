@@ -21,15 +21,15 @@ User Query:
 
 ## Output Format
 
-{
-  "success": true,
+{{
+  "success": "true",
   "query": "<original user query>",
   "answer": "<answer generated from the content>",
   "confidence": "high | medium | low",
-  "source_used": true,
+  "source_used": "true",
   "reason": "<why this answer was returned>",
   "missing_information": "<information missing from the content, if any>"
-}
+}}
 
 ## Rules
 
@@ -46,15 +46,15 @@ User Query:
 - If the answer is not found:
   Return
 
-{
-  "success": false,
+{{
+  "success": "false",
   "query": "<original query>",
   "answer": "The provided content does not contain enough information to answer this question.",
   "confidence": "low",
-  "source_used": false,
+  "source_used": "false",
   "reason": "The requested information was not found in the provided content.",
   "missing_information": "Relevant information is absent from the provided content."
-}
+}}
 
 Return only the JSON object.
 
