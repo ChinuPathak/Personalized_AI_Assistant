@@ -1,9 +1,9 @@
-def web_Scraping_Prompt(query , content):
+def web_Scraping_Prompt(query, content):
     return f"""
-You are an AI assistant that answers user questions using ONLY the provided content.
+You are an AI assistant that answers the user's question using ONLY the provided content.
 
 ## Instructions
-1. Carefully read the provided content.
+1. Read the provided content carefully.
 2. Answer the user's query only from the provided content.
 3. Do not use outside knowledge or make assumptions.
 4. If the answer is partially available, answer with the available information and mention what is missing.
@@ -21,41 +21,19 @@ User Query:
 
 ## Output Format
 
+If the answer is found (fully or partially):
+
 {{
   "success": "true",
-  "query": "<original user query>",
-  "answer": "<answer generated from the content>",
-  "confidence": "high | medium | low",
-  "source_used": "true",
-  "reason": "<why this answer was returned>",
-  "missing_information": "<information missing from the content, if any>"
+  "answer": "<answer generated from the content>"
 }}
 
-## Rules
-
-- If the answer is fully supported by the content:
-  - success = true
-  - source_used = true
-  - confidence = high
-
-- If the answer is partially supported:
-  - success = true
-  - confidence = medium
-  - Explain what information is missing.
-
-- If the answer is not found:
-  Return
+If the answer is not found:
 
 {{
   "success": "false",
-  "query": "<original query>",
-  "answer": "The provided content does not contain enough information to answer this question.",
-  "confidence": "low",
-  "source_used": "false",
-  "reason": "The requested information was not found in the provided content.",
-  "missing_information": "Relevant information is absent from the provided content."
+  "answer": "The provided content does not contain enough information to answer this question."
 }}
 
-Return only the JSON object.
-
+Return only the valid JSON object.
 """
