@@ -4,6 +4,7 @@ import psycopg2
 import bcrypt
 from pydantic import BaseModel, EmailStr
 import os
+from google.generativeai.types import GenerationConfig
 import google.generativeai as genai
 from dotenv import load_dotenv
 import speech_recognition as sr
@@ -484,7 +485,13 @@ async def webScrape(query : str):
     
     print("content>>>>>>>>>>>>>>>>" , content)
     prompt = web_Scraping_Prompt(query , content)
-    response = model.generate_content(prompt)
+    print("prompt >>>>>>>>>>>>>>>> " , prompt)
+    response = model.generate_content(
+        prompt,
+        generation_config=GenerationConfig(
+            response_mime_type="application/json"
+        )
+    )
     print("response>>>>>>>>>>>>>>>>>>>>" , response.text)
     return response.text
 
@@ -569,7 +576,9 @@ async def generateResponse(request: GenerateRequest):
 
     if assistant_response.strip() == "WEB_SEARCH_REQUIRED":
         print("Performing Web Search...")
-        assistant_response = await webScrape(query)
+        response = await webScrape(query)
+        response_dict = json.loads(response)
+        assistant_response = response_dict["answer"]
         print("assistant_response>>>>>>>>>>>>>>>>>" , assistant_response)
 
     insert_query = """
