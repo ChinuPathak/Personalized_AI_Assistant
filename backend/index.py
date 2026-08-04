@@ -21,6 +21,8 @@ import requests
 from ddgs import DDGS
 from webScrapingPrompt import web_Scraping_Prompt
 from responseGenerationPrompt import response_Generation_Prompt
+from webSearchRouterPrompt import web_search_router_prompt
+from rewriteQueryPrompt import rewrite_search_query_prompt
 from database import create_tables, get_db_connection
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from pinecone import Pinecone
@@ -569,17 +571,34 @@ async def generateResponse(request: GenerateRequest):
 
     print("Relevant Chunks >>>>>>>>>>>>>",relevant_chunks)
 
-    prompt = response_Generation_Prompt(query , reverseMessages , relevant_chunks)
+    webSearchRouterPrompt = web_search_router_prompt(query , reverseMessages , relevant_chunks )
+    response = model.generate_content(
+            webSearchRouterPrompt,
+            generation_config=GenerationConfig(
+                response_mime_type="application/json"
+            )
+        )
+    print("response>>>>>>>>>>>>>>>>>>>>" , response.text)
+    router_response = json.loads(response.text)
+    doWebSearch = router_response["web_search"]
+    print("doWebSearch>>>>>>>>>>>>>>>" , doWebSearch)
+
+    webSearchResponse = ""
+    if doWebSearch :
+        prompt = rewrite_search_query_prompt(query , reverseMessages)
+        response = model.generate_content(prompt)
+        print("response>>>>>>>>>>>>>>>>>>" , response.text)
+        search_query  = response.text
+        print("search_query >>>>>>>>>>>>>" , search_query )
+        webSearch = await webScrape(search_query )
+        response_dict = json.loads(webSearch)
+        webSearchResponse = response_dict["answer"]
+        print("webSearchResponse>>>>>>>" , webSearchResponse)
+
+    prompt = response_Generation_Prompt(query , reverseMessages , relevant_chunks , webSearchResponse)
     response = model.generate_content(prompt)
     print("response>>>>>>>>>>>>>>>>>>" , response.text)
     assistant_response = response.text
-
-    if assistant_response.strip() == "WEB_SEARCH_REQUIRED":
-        print("Performing Web Search...")
-        response = await webScrape(query)
-        response_dict = json.loads(response)
-        assistant_response = response_dict["answer"]
-        print("assistant_response>>>>>>>>>>>>>>>>>" , assistant_response)
 
     insert_query = """
     INSERT INTO chat_history(session_id, role, message)
