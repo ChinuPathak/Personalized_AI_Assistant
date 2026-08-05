@@ -1,290 +1,208 @@
 # 🤖 Personal AI Assistant Platform
 
-A production-ready AI-powered Personal Assistant built using **FastAPI**, **Google Gemini**, **Pinecone**, **PostgreSQL**, **Docker**, and **React**.
+A production-ready AI-powered Personal Assistant built using
+**FastAPI**, **Google Gemini**, **Pinecone**, **PostgreSQL**,
+**Docker**, and **React**.
 
-The application enables users to chat with an AI assistant, upload documents for Retrieval-Augmented Generation (RAG), perform intelligent web searches when required, maintain conversation history, and interact through a modern web interface.
+The platform supports Retrieval-Augmented Generation (RAG), intelligent
+web search routing, semantic search, document understanding, persistent
+chat sessions, and voice input.
 
----
+------------------------------------------------------------------------
 
-## 🚀 Features
+# ✨ Features
 
-- 🔐 User Authentication (Signup & Login)
-- 💬 Persistent Chat Sessions
-- 🧠 Conversation Memory
-- 📄 Upload PDF, DOCX and TXT documents
-- ✂️ Automatic Document Chunking
-- 🔍 Semantic Search using Pinecone
-- 🤖 Google Gemini Powered Responses
-- 🌐 Intelligent Web Search Routing
-- 🔄 Search Query Rewriting
-- 📚 Retrieval-Augmented Generation (RAG)
-- 🎤 Voice Input Support
-- 💾 PostgreSQL Database
-- 🐳 Fully Dockerized Application
-- ⚡ Modern React + TypeScript Frontend
+-   🔐 User Authentication (Signup & Login)
+-   💬 Persistent Chat Sessions
+-   🧠 Conversation Memory
+-   📄 Upload PDF, DOCX and TXT Documents
+-   ✂️ Automatic Document Chunking
+-   🔍 Semantic Search using Pinecone
+-   🤖 Google Gemini Powered Responses
+-   🌐 Intelligent Web Search Routing
+-   🔄 Search Query Rewriting
+-   📚 Retrieval-Augmented Generation (RAG)
+-   🎤 Voice Input Support
+-   💾 PostgreSQL Database
+-   🐳 Fully Dockerized (Frontend + Backend + PostgreSQL)
+-   ⚡ React + Vite Frontend
 
----
+------------------------------------------------------------------------
 
 # 🏗️ System Architecture
 
-```mermaid
+``` mermaid
 graph TD
 
-A[React Frontend]
-
-B[FastAPI Backend]
-
-C[Google Gemini]
-
-D[Pinecone Vector Database]
-
-E[PostgreSQL]
-
-F[Web Search]
-
-G[Uploaded Documents]
+A[User]
+B[React Frontend (Vite)]
+C[FastAPI Backend]
+D[Google Gemini]
+E[Pinecone Vector DB]
+F[PostgreSQL]
+G[DuckDuckGo + BeautifulSoup]
+H[Uploaded Documents]
 
 A --> B
-
 B --> C
-
-B --> D
-
-B --> E
-
-B --> F
-
-G --> B
+H --> C
+C --> D
+C --> E
+C --> F
+C --> G
 ```
 
----
+------------------------------------------------------------------------
+
+# 🧠 AI Response Workflow
+
+``` mermaid
+flowchart TD
+
+A[User Query]
+B[Retrieve Chat History]
+C[Retrieve Relevant Document Chunks]
+D{Web Search Required?}
+E[Rewrite Search Query]
+F[Search Web]
+G[Summarize Web Results]
+H[Generate Final Response]
+I[Store Chat History]
+J[Return Response]
+
+A --> B
+B --> C
+C --> D
+D -- No --> H
+D -- Yes --> E
+E --> F
+F --> G
+G --> H
+H --> I
+I --> J
+```
+
+------------------------------------------------------------------------
 
 # ⚙️ Tech Stack
 
-| Layer | Technology |
-|--------|------------|
-| Backend | FastAPI |
-| Frontend | React + Vite + TypeScript |
-| Database | PostgreSQL |
-| Vector Database | Pinecone |
-| LLM | Google Gemini |
-| Embeddings | Gemini Embedding API |
-| Document Processing | PyMuPDF, python-docx |
-| Web Search | DuckDuckGo + BeautifulSoup |
-| Authentication | bcrypt |
-| API Communication | Axios |
-| Containerization | Docker + Docker Compose |
+  Layer                 Technology
+  --------------------- ----------------------------
+  Backend               FastAPI
+  Frontend              React + Vite + TypeScript
+  Database              PostgreSQL
+  Vector Database       Pinecone
+  LLM                   Google Gemini
+  Embeddings            Gemini Embedding API
+  Document Processing   PyMuPDF, python-docx
+  Web Search            DuckDuckGo + BeautifulSoup
+  Authentication        bcrypt
+  Containerization      Docker & Docker Compose
 
----
+------------------------------------------------------------------------
 
-# 📁 Project Structure
+# 📁 Backend Structure
 
-```text
-Personal_AI_Assistant_Platform
+``` text
+backend/
 │
-├── backend
-│   ├── index.py
-│   ├── database.py
-│   ├── requirements.txt
-│   ├── Dockerfile
-│   ├── .dockerignore
-│   ├── .env.example
-│   └── ...
-│
-├── frontend
-│   ├── src
-│   ├── Dockerfile
-│   ├── .dockerignore
-│   ├── package.json
-│   ├── .env.example
-│   └── ...
-│
-├── docker-compose.yml
+├── index.py
+├── database.py
+├── requirements.txt
+├── Dockerfile
+├── .dockerignore
 ├── .env.example
-├── README.md
-└── .gitignore
+├── prompts/
+├── utils/
+└── ...
 ```
 
----
+------------------------------------------------------------------------
 
-# 🧠 How It Works
+# 🚀 Application Flow
 
-```text
-User Query
-      │
-      ▼
-Retrieve Chat History
-      │
-      ▼
-Retrieve Relevant Document Chunks
-      │
-      ▼
-Determine Whether Web Search Is Required
-      │
-      ├───────────────► No
-      │                    │
-      ▼                    │
-Rewrite Search Query        │
-      │                    │
-      ▼                    │
-Web Search                  │
-      │                    │
-      └──────────────┐      │
-                     ▼      ▼
-          Response Generation
-                     │
-                     ▼
-         Store Chat History
-                     │
-                     ▼
-             Return Response
-```
+1.  User submits a query.
+2.  Backend retrieves the last conversation history.
+3.  Relevant document chunks are retrieved from Pinecone.
+4.  AI decides whether a web search is required.
+5.  If needed, the search query is rewritten.
+6.  Relevant web pages are scraped and summarized.
+7.  Gemini generates the final response using:
+    -   Conversation history
+    -   Retrieved document chunks
+    -   Web search results (if any)
+8.  User and assistant messages are stored in PostgreSQL.
 
----
+------------------------------------------------------------------------
 
 # 📚 API Endpoints
 
-## Authentication
+  Method   Endpoint                      Description
+  -------- ----------------------------- ----------------------
+  POST     `/signup`                     Register User
+  POST     `/login`                      Login
+  POST     `/sessions`                   Create Chat Session
+  GET      `/chat/sessions/{userId}`     Get User Sessions
+  GET      `/chat/history/{sessionId}`   Get Chat History
+  POST     `/generate`                   Generate AI Response
+  POST     `/upload-document`            Upload Document
+  DELETE   `/sessions/{sessionId}`       Delete Session
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/signup` | Register a new user |
-| POST | `/login` | Login |
+------------------------------------------------------------------------
 
----
+# 📸 Screenshots
 
-## Chat
+Place your screenshots inside:
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/sessions` | Create a chat session |
-| GET | `/chat/sessions/{userId}` | Get all sessions |
-| GET | `/chat/history/{sessionId}` | Get chat history |
-| DELETE | `/sessions/{sessionId}` | Delete session |
-| POST | `/generate` | Generate AI response |
+``` text
+screenshots/
+├── login.png
+├── signup.png
+├── chat.png
+├── document-upload.png
+└── docker-compose.png
+```
 
----
+Example:
 
-## Documents
+``` md
+![Chat](screenshots/chat.png)
+```
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/upload-document` | Upload PDF, DOCX or TXT |
-
----
-
-# 🧠 AI Workflow
-
-The backend follows a Retrieval-Augmented Generation (RAG) pipeline.
-
-### Step 1
-
-Receive the user's query.
-
-### Step 2
-
-Generate embeddings using Gemini Embedding API.
-
-### Step 3
-
-Retrieve relevant document chunks from Pinecone.
-
-### Step 4
-
-Retrieve recent conversation history.
-
-### Step 5
-
-Determine whether external web search is required.
-
-### Step 6
-
-If required:
-
-- Rewrite the search query
-- Search the web
-- Scrape relevant pages
-- Summarize retrieved content
-
-### Step 7
-
-Generate the final response using:
-
-- Conversation history
-- Retrieved document chunks
-- Web search results (if available)
-
-### Step 8
-
-Store both user and assistant messages in PostgreSQL.
-
----
+------------------------------------------------------------------------
 
 # 🐳 Running with Docker
 
-## Clone Repository
-
-```bash
-git clone https://github.com/<your-username>/Personal_AI_Assistant_Platform.git
-
+``` bash
+git clone https://github.com/your-username/Personal_AI_Assistant_Platform.git
 cd Personal_AI_Assistant_Platform
-```
-
----
-
-## Configure Environment Variables
-
-Create the following files from the provided examples.
-
-```
-.env
-backend/.env
-frontend/.env
-```
-
----
-
-## Build Containers
-
-```bash
 docker compose up --build
 ```
 
----
+Frontend:
 
-## Application URLs
+    http://localhost:5173
 
-Frontend
+Backend:
 
-```
-http://localhost:5173
-```
+    http://localhost:8000
 
-Backend
-
-```
-http://localhost:8000
-```
-
----
+------------------------------------------------------------------------
 
 # 🔑 Environment Variables
 
-## Root
+## Root `.env`
 
-```env
+``` env
 DB_NAME=
 DB_USER=
 DB_PASSWORD=
 ```
 
----
+## Backend `.env`
 
-## Backend
-
-```env
+``` env
 GEMINI_API_KEY=
-
 PINECONE_API_KEY=
 PINECONE_INDEX=
 PINECONE_HOST=
@@ -292,78 +210,40 @@ PINECONE_HOST=
 DB_NAME=
 DB_USER=
 DB_PASSWORD=
-DB_HOST=
-DB_PORT=
+DB_HOST=postgres
+DB_PORT=5432
 ```
 
----
+## Frontend `.env`
 
-## Frontend
-
-```env
+``` env
 VITE_API_URL=http://localhost:8000
 ```
 
----
-
-# 📦 Docker Services
-
-The project consists of three containers.
-
-| Container | Description |
-|------------|-------------|
-| PostgreSQL | Stores users, chat sessions and conversation history |
-| FastAPI | Backend API, AI orchestration and RAG |
-| React + Nginx | User Interface |
-
-All services are managed using Docker Compose.
-
----
+------------------------------------------------------------------------
 
 # 📈 Future Improvements
 
-- JWT Authentication
-- Streaming AI Responses
-- Redis Caching
-- Hybrid Search
-- Multi-document RAG
-- Google GenAI SDK Migration
-- CI/CD with GitHub Actions
-- Kubernetes Deployment
-- Cloud Deployment (AWS/GCP/Azure)
+-   JWT Authentication
+-   Streaming AI Responses
+-   Redis Caching
+-   Hybrid Search
+-   Multi-document RAG
+-   Google GenAI SDK Migration
+-   GitHub Actions CI/CD
+-   Kubernetes Deployment
+-   Cloud Deployment
 
----
-
-# 📸 Screenshots
-
-Add screenshots here.
-
-```
-screenshots/
-    login.png
-    signup.png
-    chat.png
-    upload.png
-    docker.png
-```
-
-Example:
-
-```markdown
-![Chat](screenshots/chat.png)
-```
-
----
+------------------------------------------------------------------------
 
 # 👨‍💻 Author
 
 **Chinmay Pathak**
 
-Backend Developer | AI Enthusiast
+Backend Developer \| AI Enthusiast
 
-GitHub:
-https://github.com/ChinuPathak
+GitHub: https://github.com/ChinuPathak
 
----
+------------------------------------------------------------------------
 
-# ⭐ If you found this project useful, please consider giving it a star.
+⭐ If you found this project useful, please consider giving it a star.
