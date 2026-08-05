@@ -1,12 +1,35 @@
+import os
+import time
 import psycopg2
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 def get_db_connection():
-    return psycopg2.connect(
-        dbname="personal_AI_Assistant_Platform",
-        user="postgres",
-        password="1234",
-        host="localhost"
-    )
+    retries = 10
+    delay = 3
+
+    while retries > 0:
+        try:
+            conn = psycopg2.connect(
+                dbname=os.getenv("DB_NAME"),
+                user=os.getenv("DB_USER"),
+                password=os.getenv("DB_PASSWORD"),
+                host=os.getenv("DB_HOST"),
+                port=os.getenv("DB_PORT"),
+            )
+            print("✅ Connected to PostgreSQL")
+            return conn
+
+        except psycopg2.OperationalError as e:
+            retries -= 1
+            print(f"❌ Database not ready ({e})")
+            print(f"Retrying in {delay} seconds... ({retries} retries left)")
+            time.sleep(delay)
+
+    raise Exception("Could not connect to PostgreSQL after multiple retries.")
+
 
 def create_tables():
     conn = get_db_connection()
@@ -64,6 +87,5 @@ def create_tables():
     """)
 
     conn.commit()
-
     cur.close()
     conn.close()
