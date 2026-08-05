@@ -31,31 +31,6 @@ chat sessions, and voice input.
 
 # 🏗️ System Architecture
 
-``` mermaid
-graph TD
-
-A[User]
-B[React Frontend (Vite)]
-C[FastAPI Backend]
-D[Google Gemini]
-E[Pinecone Vector DB]
-F[PostgreSQL]
-G[DuckDuckGo + BeautifulSoup]
-H[Uploaded Documents]
-
-A --> B
-B --> C
-H --> C
-C --> D
-C --> E
-C --> F
-C --> G
-```
-
-------------------------------------------------------------------------
-
-# 🧠 AI Response Workflow
-
 ```mermaid
 graph TD
 
@@ -88,6 +63,36 @@ Backend --> Pinecone
 Backend --> Postgres
 
 Backend --> Search
+```
+
+------------------------------------------------------------------------
+
+# 🧠 AI Response Workflow
+
+``` mermaid
+flowchart TD
+
+A[User Query]
+B[Retrieve Chat History]
+C[Retrieve Relevant Document Chunks]
+D{Web Search Required?}
+E[Rewrite Search Query]
+F[Search Web]
+G[Summarize Web Results]
+H[Generate Final Response]
+I[Store Chat History]
+J[Return Response]
+
+A --> B
+B --> C
+C --> D
+D -- No --> H
+D -- Yes --> E
+E --> F
+F --> G
+G --> H
+H --> I
+I --> J
 ```
 
 ------------------------------------------------------------------------
