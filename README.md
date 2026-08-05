@@ -56,30 +56,38 @@ C --> G
 
 # 🧠 AI Response Workflow
 
-``` mermaid
-flowchart TD
+```mermaid
+graph TD
 
-A[User Query]
-B[Retrieve Chat History]
-C[Retrieve Relevant Document Chunks]
-D{Web Search Required?}
-E[Rewrite Search Query]
-F[Search Web]
-G[Summarize Web Results]
-H[Generate Final Response]
-I[Store Chat History]
-J[Return Response]
+User["👤 User"]
 
-A --> B
-B --> C
-C --> D
-D -- No --> H
-D -- Yes --> E
-E --> F
-F --> G
-G --> H
-H --> I
-I --> J
+Frontend["⚛️ React + Vite"]
+
+Backend["🚀 FastAPI Backend"]
+
+Gemini["🤖 Google Gemini"]
+
+Pinecone["📚 Pinecone Vector DB"]
+
+Postgres["🗄️ PostgreSQL"]
+
+Search["🌐 Web Search"]
+
+Documents["📄 Uploaded Documents"]
+
+User --> Frontend
+
+Frontend --> Backend
+
+Documents --> Backend
+
+Backend --> Gemini
+
+Backend --> Pinecone
+
+Backend --> Postgres
+
+Backend --> Search
 ```
 
 ------------------------------------------------------------------------
