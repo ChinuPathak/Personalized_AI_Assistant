@@ -1,394 +1,357 @@
-# 🤖 AI RAG Chatbot with Intelligent Web Search
+# 🤖 Personal AI Assistant Platform
 
-An AI-powered chatbot built using **FastAPI**, **Google Gemini**, **Pinecone**, and **PostgreSQL** that can answer questions using:
+A production-ready AI-powered Personal Assistant built using **FastAPI**, **Google Gemini**, **Pinecone**, **PostgreSQL**, **Docker**, and **React**.
 
-- 📄 Uploaded documents (PDF & DOCX)
-- 💬 Conversation history
-- 🌐 Live web search (when required)
-
-Unlike traditional RAG applications, this chatbot intelligently decides **when a web search is needed** and automatically rewrites follow-up questions into standalone search queries before retrieving information from the web.
+The application enables users to chat with an AI assistant, upload documents for Retrieval-Augmented Generation (RAG), perform intelligent web searches when required, maintain conversation history, and interact through a modern web interface.
 
 ---
 
-# 🚀 Features
+## 🚀 Features
 
-- 🔐 User Authentication
-  - Signup
-  - Login
-  - Password hashing using bcrypt
-
-- 💬 Chat Sessions
-  - Multiple chat sessions
-  - Conversation history
-  - Automatic chat title generation
-
-- 📄 Document Upload
-  - PDF support
-  - DOCX support
-  - Automatic text extraction
-  - Text chunking
-  - Embedding generation
-
-- 🧠 RAG (Retrieval Augmented Generation)
-  - Gemini Embeddings
-  - Pinecone Vector Database
-  - Semantic Search
-
-- 🌐 Intelligent Web Search
-  - AI decides if web search is required
-  - Query rewriting for follow-up questions
-  - Web scraping from multiple sources
-  - AI summarizes web content before generating the final answer
-
-- 🎤 Voice Input
-  - Speech-to-text
-  - Google Speech Recognition
+- 🔐 User Authentication (Signup & Login)
+- 💬 Persistent Chat Sessions
+- 🧠 Conversation Memory
+- 📄 Upload PDF, DOCX and TXT documents
+- ✂️ Automatic Document Chunking
+- 🔍 Semantic Search using Pinecone
+- 🤖 Google Gemini Powered Responses
+- 🌐 Intelligent Web Search Routing
+- 🔄 Search Query Rewriting
+- 📚 Retrieval-Augmented Generation (RAG)
+- 🎤 Voice Input Support
+- 💾 PostgreSQL Database
+- 🐳 Fully Dockerized Application
+- ⚡ Modern React + TypeScript Frontend
 
 ---
 
-# 🏗 Architecture
+# 🏗️ System Architecture
+
+```mermaid
+graph TD
+
+A[React Frontend]
+
+B[FastAPI Backend]
+
+C[Google Gemini]
+
+D[Pinecone Vector Database]
+
+E[PostgreSQL]
+
+F[Web Search]
+
+G[Uploaded Documents]
+
+A --> B
+
+B --> C
+
+B --> D
+
+B --> E
+
+B --> F
+
+G --> B
+```
+
+---
+
+# ⚙️ Tech Stack
+
+| Layer | Technology |
+|--------|------------|
+| Backend | FastAPI |
+| Frontend | React + Vite + TypeScript |
+| Database | PostgreSQL |
+| Vector Database | Pinecone |
+| LLM | Google Gemini |
+| Embeddings | Gemini Embedding API |
+| Document Processing | PyMuPDF, python-docx |
+| Web Search | DuckDuckGo + BeautifulSoup |
+| Authentication | bcrypt |
+| API Communication | Axios |
+| Containerization | Docker + Docker Compose |
+
+---
+
+# 📁 Project Structure
 
 ```text
-                    User Query
-                         │
-                         ▼
-                 Save User Message
-                         │
-                         ▼
-            Load Last Conversation
-                         │
-                         ▼
-                Generate Embedding
-                         │
-                         ▼
-               Search Pinecone Index
-                         │
-                         ▼
-             Gemini Web Search Router
-                         │
-          ┌──────────────┴──────────────┐
-          │                             │
-          ▼                             ▼
-     Web Search Not Needed        Web Search Needed
-          │                             │
-          │                     Rewrite Search Query
-          │                             │
-          │                             ▼
-          │                     Search the Web
-          │                             │
-          │                             ▼
-          │                   Extract Page Content
-          │                             │
-          │                             ▼
-          │                 Summarize Web Results
-          │                             │
-          └──────────────┬──────────────┘
-                         ▼
-             Final Response Generation
-                         │
-                         ▼
-                 Save Chat History
-                         │
-                         ▼
-                    Return Response
+Personal_AI_Assistant_Platform
+│
+├── backend
+│   ├── index.py
+│   ├── database.py
+│   ├── requirements.txt
+│   ├── Dockerfile
+│   ├── .dockerignore
+│   ├── .env.example
+│   └── ...
+│
+├── frontend
+│   ├── src
+│   ├── Dockerfile
+│   ├── .dockerignore
+│   ├── package.json
+│   ├── .env.example
+│   └── ...
+│
+├── docker-compose.yml
+├── .env.example
+├── README.md
+└── .gitignore
 ```
 
 ---
 
-# 🛠 Tech Stack
+# 🧠 How It Works
 
-## Backend
-
-- FastAPI
-- Python
-- PostgreSQL
-- Pinecone
-- Google Gemini API
-- BeautifulSoup
-- Requests
-- bcrypt
-- SpeechRecognition
-
-## AI
-
-- Gemini 2.5 Flash
-- Gemini Embeddings
-- Prompt Engineering
-- Retrieval Augmented Generation (RAG)
-
-## Database
-
-- PostgreSQL
-
-Tables:
-
-- users
-- chat_sessions
-- chat_history
-- documents
-- document_chunks
-
-## Vector Database
-
-- Pinecone
-
----
-
-# 📂 Project Structure
-
-```
-backend/
-│
-├── main.py
-├── database.py
-├── responseGenerationPrompt.py
-├── webSearchRouterPrompt.py
-├── rewriteSearchQueryPrompt.py
-├── webScrapingPrompt.py
-├── requirements.txt
-├── .env
-│
-├── uploads/
-│
-└── README.md
+```text
+User Query
+      │
+      ▼
+Retrieve Chat History
+      │
+      ▼
+Retrieve Relevant Document Chunks
+      │
+      ▼
+Determine Whether Web Search Is Required
+      │
+      ├───────────────► No
+      │                    │
+      ▼                    │
+Rewrite Search Query        │
+      │                    │
+      ▼                    │
+Web Search                  │
+      │                    │
+      └──────────────┐      │
+                     ▼      ▼
+          Response Generation
+                     │
+                     ▼
+         Store Chat History
+                     │
+                     ▼
+             Return Response
 ```
 
 ---
 
-# ⚙️ Installation
+# 📚 API Endpoints
+
+## Authentication
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/signup` | Register a new user |
+| POST | `/login` | Login |
+
+---
+
+## Chat
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/sessions` | Create a chat session |
+| GET | `/chat/sessions/{userId}` | Get all sessions |
+| GET | `/chat/history/{sessionId}` | Get chat history |
+| DELETE | `/sessions/{sessionId}` | Delete session |
+| POST | `/generate` | Generate AI response |
+
+---
+
+## Documents
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/upload-document` | Upload PDF, DOCX or TXT |
+
+---
+
+# 🧠 AI Workflow
+
+The backend follows a Retrieval-Augmented Generation (RAG) pipeline.
+
+### Step 1
+
+Receive the user's query.
+
+### Step 2
+
+Generate embeddings using Gemini Embedding API.
+
+### Step 3
+
+Retrieve relevant document chunks from Pinecone.
+
+### Step 4
+
+Retrieve recent conversation history.
+
+### Step 5
+
+Determine whether external web search is required.
+
+### Step 6
+
+If required:
+
+- Rewrite the search query
+- Search the web
+- Scrape relevant pages
+- Summarize retrieved content
+
+### Step 7
+
+Generate the final response using:
+
+- Conversation history
+- Retrieved document chunks
+- Web search results (if available)
+
+### Step 8
+
+Store both user and assistant messages in PostgreSQL.
+
+---
+
+# 🐳 Running with Docker
 
 ## Clone Repository
 
 ```bash
-git clone https://github.com/<your-username>/<repository-name>.git
+git clone https://github.com/<your-username>/Personal_AI_Assistant_Platform.git
 
-cd <repository-name>
-```
-
----
-
-## Create Virtual Environment
-
-Windows
-
-```bash
-python -m venv venv
-```
-
-Activate
-
-```bash
-venv\Scripts\activate
-```
-
-Mac/Linux
-
-```bash
-python3 -m venv venv
-
-source venv/bin/activate
-```
-
----
-
-## Install Dependencies
-
-```bash
-pip install -r requirements.txt
+cd Personal_AI_Assistant_Platform
 ```
 
 ---
 
 ## Configure Environment Variables
 
-Create a `.env` file
+Create the following files from the provided examples.
 
-```env
-GEMINI_API_KEY=YOUR_GEMINI_KEY
-
-PINECONE_API_KEY=YOUR_PINECONE_KEY
-
-PINECONE_INDEX=YOUR_INDEX_NAME
-
-PINECONE_HOST=YOUR_HOST
+```
+.env
+backend/.env
+frontend/.env
 ```
 
 ---
 
-## Run Backend
+## Build Containers
 
 ```bash
-uvicorn main:app --reload
-```
-
-Server
-
-```
-http://127.0.0.1:8000
+docker compose up --build
 ```
 
 ---
 
-# 📑 API Endpoints
+## Application URLs
 
-## Authentication
-
-| Method | Endpoint | Description |
-|---------|----------|-------------|
-| POST | `/signup` | Register User |
-| POST | `/login` | Login User |
-
----
-
-## Sessions
-
-| Method | Endpoint |
-|---------|----------|
-| POST | `/sessions` |
-| GET | `/chat/sessions/{userId}` |
-| GET | `/session/{id}` |
-
----
-
-## Chat
-
-| Method | Endpoint |
-|---------|----------|
-| POST | `/generate` |
-| GET | `/chat/history/{session_id}` |
-
----
-
-## Documents
-
-| Method | Endpoint |
-|---------|----------|
-| POST | `/docUpload` |
-
----
-
-## Voice
-
-| Method | Endpoint |
-|---------|----------|
-| POST | `/voiceChat` |
-
----
-
-# 🧠 How the AI Works
-
-## Step 1
-
-User asks a question.
-
-↓
-
-## Step 2
-
-Conversation history is loaded.
-
-↓
-
-## Step 3
-
-Relevant document chunks are retrieved from Pinecone.
-
-↓
-
-## Step 4
-
-A Gemini Router determines whether a web search is required.
-
-↓
-
-## Step 5 (If Required)
-
-The user's query is rewritten into a standalone search query.
-
-Example:
-
-User
+Frontend
 
 ```
-Tell me more.
+http://localhost:5173
 ```
 
-↓
-
-Rewritten Query
+Backend
 
 ```
-Tell me more about Nirmal Purja (Nimsdai).
+http://localhost:8000
 ```
-
-↓
-
-## Step 6
-
-Relevant web pages are scraped.
-
-↓
-
-## Step 7
-
-Gemini summarizes the scraped web content.
-
-↓
-
-## Step 8
-
-Gemini generates the final response using:
-
-- Conversation History
-- Document Chunks
-- Web Search Results
-- General Knowledge
 
 ---
 
-# 🧩 Intelligent Routing
+# 🔑 Environment Variables
 
-The chatbot automatically decides whether to perform a web search.
+## Root
 
-Examples:
-
-| User Query | Web Search |
-|------------|------------|
-| Summarize my uploaded PDF | ❌ |
-| Explain Python Lists | ❌ |
-| Latest IPL Winner | ✅ |
-| Tell me more | ✅ *(if referring to a web topic)* |
-| Is he still alive? | ✅ |
+```env
+DB_NAME=
+DB_USER=
+DB_PASSWORD=
+```
 
 ---
 
-# 📄 Supported File Types
+## Backend
 
-- PDF
-- DOCX
+```env
+GEMINI_API_KEY=
+
+PINECONE_API_KEY=
+PINECONE_INDEX=
+PINECONE_HOST=
+
+DB_NAME=
+DB_USER=
+DB_PASSWORD=
+DB_HOST=
+DB_PORT=
+```
 
 ---
 
-# 🔒 Security
+## Frontend
 
-- Password hashing using bcrypt
-- Parameterized SQL queries
-- Environment variables for API keys
+```env
+VITE_API_URL=http://localhost:8000
+```
+
+---
+
+# 📦 Docker Services
+
+The project consists of three containers.
+
+| Container | Description |
+|------------|-------------|
+| PostgreSQL | Stores users, chat sessions and conversation history |
+| FastAPI | Backend API, AI orchestration and RAG |
+| React + Nginx | User Interface |
+
+All services are managed using Docker Compose.
 
 ---
 
 # 📈 Future Improvements
 
-- Streaming responses
-- Async web scraping
-- Redis caching
-- Citation support
-- Hybrid search
-- Multi-document retrieval
-- Image understanding
-- OCR support
-- Conversation summarization
-- Background task queue
+- JWT Authentication
+- Streaming AI Responses
+- Redis Caching
+- Hybrid Search
+- Multi-document RAG
+- Google GenAI SDK Migration
+- CI/CD with GitHub Actions
+- Kubernetes Deployment
+- Cloud Deployment (AWS/GCP/Azure)
+
+---
+
+# 📸 Screenshots
+
+Add screenshots here.
+
+```
+screenshots/
+    login.png
+    signup.png
+    chat.png
+    upload.png
+    docker.png
+```
+
+Example:
+
+```markdown
+![Chat](screenshots/chat.png)
+```
 
 ---
 
@@ -398,8 +361,9 @@ Examples:
 
 Backend Developer | AI Enthusiast
 
+GitHub:
+https://github.com/ChinuPathak
+
 ---
 
-# 📜 License
-
-This project is licensed under the MIT License.
+# ⭐ If you found this project useful, please consider giving it a star.
