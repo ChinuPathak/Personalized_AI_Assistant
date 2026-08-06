@@ -1,262 +1,262 @@
-# 🤖 Personal AI Assistant Platform
+# 🤖 Personalized AI Assistant
 
-A production-ready AI-powered Personal Assistant built using
-**FastAPI**, **Google Gemini**, **Pinecone**, **PostgreSQL**,
-**Docker**, and **React**.
+A full-stack AI-powered personal assistant that enables users to chat with an AI, upload documents, maintain conversation history, and interact using voice. The application is built with a modern React frontend, FastAPI backend, PostgreSQL database, and vector search powered by Pinecone.
 
-The platform supports Retrieval-Augmented Generation (RAG), intelligent
-web search routing, semantic search, document understanding, persistent
-chat sessions, and voice input.
+## 🌐 Live Demo
 
-------------------------------------------------------------------------
+**Frontend:** https://personalized-ai-assistant-amber.vercel.app
 
-# ✨ Features
+**Backend API:** https://personalized-ai-assistant-95rh.onrender.com
 
--   🔐 User Authentication (Signup & Login)
--   💬 Persistent Chat Sessions
--   🧠 Conversation Memory
--   📄 Upload PDF, DOCX and TXT Documents
--   ✂️ Automatic Document Chunking
--   🔍 Semantic Search using Pinecone
--   🤖 Google Gemini Powered Responses
--   🌐 Intelligent Web Search Routing
--   🔄 Search Query Rewriting
--   📚 Retrieval-Augmented Generation (RAG)
--   🎤 Voice Input Support
--   💾 PostgreSQL Database
--   🐳 Fully Dockerized (Frontend + Backend + PostgreSQL)
--   ⚡ React + Vite Frontend
-
-------------------------------------------------------------------------
-
-# 🏗️ System Architecture
-
-```mermaid
-graph TD
-
-User["👤 User"]
-
-Frontend["⚛️ React + Vite"]
-
-Backend["🚀 FastAPI Backend"]
-
-Gemini["🤖 Google Gemini"]
-
-Pinecone["📚 Pinecone Vector DB"]
-
-Postgres["🗄️ PostgreSQL"]
-
-Search["🌐 Web Search"]
-
-Documents["📄 Uploaded Documents"]
-
-User --> Frontend
-
-Frontend --> Backend
-
-Documents --> Backend
-
-Backend --> Gemini
-
-Backend --> Pinecone
-
-Backend --> Postgres
-
-Backend --> Search
-```
-
-------------------------------------------------------------------------
-
-# 🧠 AI Response Workflow
-
-``` mermaid
-flowchart TD
-
-A[User Query]
-B[Retrieve Chat History]
-C[Retrieve Relevant Document Chunks]
-D{Web Search Required?}
-E[Rewrite Search Query]
-F[Search Web]
-G[Summarize Web Results]
-H[Generate Final Response]
-I[Store Chat History]
-J[Return Response]
-
-A --> B
-B --> C
-C --> D
-D -- No --> H
-D -- Yes --> E
-E --> F
-F --> G
-G --> H
-H --> I
-I --> J
-```
-
-------------------------------------------------------------------------
-
-# ⚙️ Tech Stack
-
-  Layer                 Technology
-  --------------------- ----------------------------
-  Backend               FastAPI
-  Frontend              React + Vite + TypeScript
-  Database              PostgreSQL
-  Vector Database       Pinecone
-  LLM                   Google Gemini
-  Embeddings            Gemini Embedding API
-  Document Processing   PyMuPDF, python-docx
-  Web Search            DuckDuckGo + BeautifulSoup
-  Authentication        bcrypt
-  Containerization      Docker & Docker Compose
-
-------------------------------------------------------------------------
-
-# 📁 Backend Structure
-
-``` text
-backend/
-│
-├── index.py
-├── database.py
-├── requirements.txt
-├── Dockerfile
-├── .dockerignore
-├── .env.example
-├── prompts/
-├── utils/
-└── ...
-```
-
-------------------------------------------------------------------------
-
-# 🚀 Application Flow
-
-1.  User submits a query.
-2.  Backend retrieves the last conversation history.
-3.  Relevant document chunks are retrieved from Pinecone.
-4.  AI decides whether a web search is required.
-5.  If needed, the search query is rewritten.
-6.  Relevant web pages are scraped and summarized.
-7.  Gemini generates the final response using:
-    -   Conversation history
-    -   Retrieved document chunks
-    -   Web search results (if any)
-8.  User and assistant messages are stored in PostgreSQL.
-
-------------------------------------------------------------------------
-
-# 📚 API Endpoints
-
-  Method   Endpoint                      Description
-  -------- ----------------------------- ----------------------
-  POST     `/signup`                     Register User
-  POST     `/login`                      Login
-  POST     `/sessions`                   Create Chat Session
-  GET      `/chat/sessions/{userId}`     Get User Sessions
-  GET      `/chat/history/{sessionId}`   Get Chat History
-  POST     `/generate`                   Generate AI Response
-  POST     `/upload-document`            Upload Document
-  DELETE   `/sessions/{sessionId}`       Delete Session
-
-------------------------------------------------------------------------
+---
 
 # 📸 Screenshots
 
-Place your screenshots inside:
+> Add screenshots inside the `screenshots/` folder and update the image paths below.
 
-``` text
-screenshots/
-├── login.png
-├── signup.png
-├── chat.png
-├── document-upload.png
-└── docker-compose.png
-```
+### Login
 
-Example:
+![Login](screenshots/login.png)
 
-``` md
+### Dashboard
+
+![Dashboard](screenshots/dashboard.png)
+
+### Chat
+
 ![Chat](screenshots/chat.png)
+
+### Document Upload
+
+![Upload](screenshots/upload.png)
+
+---
+
+# ✨ Features
+
+- 🔐 User Authentication
+- 💬 AI Chat Assistant
+- 📄 Upload PDF, DOCX and TXT files
+- 🧠 Document-based Question Answering
+- 🎤 Voice Input Support
+- 💾 Persistent Chat History
+- 📚 Multiple Chat Sessions
+- 🔍 Semantic Search using Pinecone
+- ⚡ Gemini AI Integration
+- 🐳 Dockerized Application
+- ☁️ Cloud Deployment
+
+---
+
+# 🏗️ Architecture
+
+```text
+                    React + TypeScript
+                           │
+                           ▼
+                      Axios API Calls
+                           │
+                           ▼
+                 FastAPI Backend (Python)
+                           │
+        ┌──────────────────┼──────────────────┐
+        │                  │                  │
+        ▼                  ▼                  ▼
+   Gemini AI         Neon PostgreSQL      Pinecone
 ```
 
-------------------------------------------------------------------------
+---
 
-# 🐳 Running with Docker
+# 🛠️ Tech Stack
 
-``` bash
-git clone https://github.com/your-username/Personal_AI_Assistant_Platform.git
-cd Personal_AI_Assistant_Platform
+## Frontend
+
+- React
+- TypeScript
+- Vite
+- Axios
+- Tailwind CSS
+
+## Backend
+
+- FastAPI
+- Python
+- Psycopg2
+- Google Gemini API
+- Pinecone
+
+## Database
+
+- PostgreSQL (Neon)
+
+## Deployment
+
+- Vercel
+- Render
+- Docker
+- GitHub
+
+---
+
+# 📂 Project Structure
+
+```
+Personalized_AI_Assistant
+│
+├── backend
+│   ├── Dockerfile
+│   ├── index.py
+│   ├── database.py
+│   ├── requirements.txt
+│   └── ...
+│
+├── frontend
+│   ├── src
+│   ├── public
+│   ├── Dockerfile
+│   └── ...
+│
+├── screenshots
+│
+├── docker-compose.yml
+│
+└── README.md
+```
+
+---
+
+# 🚀 Getting Started
+
+## Clone Repository
+
+```bash
+git clone https://github.com/ChinuPathak/Personalized_AI_Assistant.git
+
+cd Personalized_AI_Assistant
+```
+
+---
+
+## Backend Setup
+
+```bash
+cd backend
+
+python -m venv venv
+
+venv\Scripts\Activate
+
+pip install -r requirements.txt
+
+uvicorn index:app --reload
+```
+
+---
+
+## Frontend Setup
+
+```bash
+cd frontend
+
+npm install
+
+npm run dev
+```
+
+---
+
+# 🐳 Docker
+
+Build and run the project using Docker Compose.
+
+```bash
 docker compose up --build
 ```
 
-Frontend:
-
-    http://localhost:5173
-
-Backend:
-
-    http://localhost:8000
-
-------------------------------------------------------------------------
+---
 
 # 🔑 Environment Variables
 
-## Root `.env`
+## Backend
 
-``` env
-DB_NAME=
-DB_USER=
-DB_PASSWORD=
-```
+```env
+DATABASE_URL=
 
-## Backend `.env`
-
-``` env
 GEMINI_API_KEY=
+
 PINECONE_API_KEY=
+
 PINECONE_INDEX=
+
 PINECONE_HOST=
-
-DB_NAME=
-DB_USER=
-DB_PASSWORD=
-DB_HOST=postgres
-DB_PORT=5432
 ```
 
-## Frontend `.env`
+---
 
-``` env
-VITE_API_URL=http://localhost:8000
+## Frontend
+
+```env
+VITE_API_URL=
 ```
 
-------------------------------------------------------------------------
+---
 
-# 📈 Future Improvements
+# 📖 API Endpoints
 
--   JWT Authentication
--   Streaming AI Responses
--   Redis Caching
--   Hybrid Search
--   Multi-document RAG
--   Google GenAI SDK Migration
--   GitHub Actions CI/CD
--   Kubernetes Deployment
--   Cloud Deployment
+| Method | Endpoint | Description |
+|---------|----------|-------------|
+| POST | /signup | Register User |
+| POST | /login | Login User |
+| POST | /sessions | Create Chat Session |
+| POST | /generate | Generate AI Response |
+| POST | /docUpload | Upload Documents |
+| POST | /voiceChat | Voice Input |
+| GET | /chat/history/{sessionId} | Chat History |
+| GET | /chat/sessions/{userId} | User Sessions |
+| DELETE | /sessions/{sessionId} | Delete Session |
 
-------------------------------------------------------------------------
+---
+
+# 🚀 Deployment
+
+### Frontend
+
+Vercel
+
+### Backend
+
+Render
+
+### Database
+
+Neon PostgreSQL
+
+---
+
+# 🔮 Future Improvements
+
+- Streaming AI Responses
+- Dark Mode
+- AI Conversation Memory
+- Image Upload Support
+- OCR Integration
+- Multi-language Support
+- User Profile Management
+- Export Chat as PDF
+- Admin Dashboard
+
+---
 
 # 👨‍💻 Author
 
 **Chinmay Pathak**
 
-Backend Developer \| AI Enthusiast
-
 GitHub: https://github.com/ChinuPathak
 
-------------------------------------------------------------------------
+LinkedIn: https://www.linkedin.com/in/chinmaypathak18/
 
-⭐ If you found this project useful, please consider giving it a star.
+---
+
+# ⭐ Support
+
+If you found this project useful, consider giving it a ⭐ on GitHub.
