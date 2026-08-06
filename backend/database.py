@@ -10,15 +10,11 @@ def get_db_connection():
     retries = 10
     delay = 3
 
+    database_url = os.getenv("DATABASE_URL")
+
     while retries > 0:
         try:
-            conn = psycopg2.connect(
-                dbname=os.getenv("DB_NAME"),
-                user=os.getenv("DB_USER"),
-                password=os.getenv("DB_PASSWORD"),
-                host=os.getenv("DB_HOST"),
-                port=os.getenv("DB_PORT"),
-            )
+            conn = psycopg2.connect(database_url)
             print("✅ Connected to PostgreSQL")
             return conn
 
