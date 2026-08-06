@@ -502,117 +502,114 @@ async def generateResponse(request: GenerateRequest):
     cur = conn.cursor()
     status = "ACTIVE"
 
-    # sessionId = request.session_id
-    # query = request.query
+    sessionId = request.session_id
+    query = request.query
 
-    # select_titleQuery = """
-    # SELECT title
-    # FROM chat_sessions
-    # WHERE session_id=%s
-    # """
-    # cur.execute(select_titleQuery, (sessionId,))
-    # title = cur.fetchone()[0]
-    # if title == "New Chat":
-    #     update_query = """
-    #     UPDATE chat_sessions 
-    #     SET title = %s
-    #     WHERE session_id = %s
-    #     """
-    #     cur.execute(update_query , (query , sessionId))
+    select_titleQuery = """
+    SELECT title
+    FROM chat_sessions
+    WHERE session_id=%s
+    """
+    cur.execute(select_titleQuery, (sessionId,))
+    title = cur.fetchone()[0]
+    if title == "New Chat":
+        update_query = """
+        UPDATE chat_sessions 
+        SET title = %s
+        WHERE session_id = %s
+        """
+        cur.execute(update_query , (query , sessionId))
 
-    # update_statusQuery = """
-    # UPDATE chat_sessions
-    # SET status = %s
-    # WHERE session_id = %s
-    # """
-    # cur.execute(update_statusQuery, (status , sessionId))
-    # response = genai.embed_content(
-    #     model="models/gemini-embedding-001",
-    #     content=query,
-    #     task_type="retrieval_query"
-    # )
+    update_statusQuery = """
+    UPDATE chat_sessions
+    SET status = %s
+    WHERE session_id = %s
+    """
+    cur.execute(update_statusQuery, (status , sessionId))
+    response = genai.embed_content(
+        model="models/gemini-embedding-001",
+        content=query,
+        task_type="retrieval_query"
+    )
 
-    # embeddedQuery = response["embedding"]
+    embeddedQuery = response["embedding"]
 
-    # insert_query = """
-    # INSERT INTO chat_history(session_id , role , message)
-    # VALUES (%s,%s,%s) 
-    # """
-    # cur.execute(insert_query,(sessionId , "user" , query))    
+    insert_query = """
+    INSERT INTO chat_history(session_id , role , message)
+    VALUES (%s,%s,%s) 
+    """
+    cur.execute(insert_query,(sessionId , "user" , query))    
 
-    # select_query = """
-    # SELECT role, message, created_at
-    # FROM chat_history
-    # WHERE session_id = %s
-    # ORDER BY message_id DESC
-    # LIMIT 10;
-    # """
-    # cur.execute(select_query,(sessionId,))
-    # messages = cur.fetchall()
-    # print("messages>>>>>>>>>>>>>>>>>>>>>>>",messages)
-    # reverseMessages = list(reversed(messages))
-    # print("reveredMessage>>>>>>>>>>>>>" , reverseMessages)
+    select_query = """
+    SELECT role, message, created_at
+    FROM chat_history
+    WHERE session_id = %s
+    ORDER BY message_id DESC
+    LIMIT 10;
+    """
+    cur.execute(select_query,(sessionId,))
+    messages = cur.fetchall()
+    print("messages>>>>>>>>>>>>>>>>>>>>>>>",messages)
+    reverseMessages = list(reversed(messages))
+    print("reveredMessage>>>>>>>>>>>>>" , reverseMessages)
 
-    # search_result = index.query(
-    #     vector=embeddedQuery,
-    #     top_k=5,
-    #     include_metadata=True,
-    #     filter={
-    #        "session_id": sessionId
-    #     }
-    # )
+    search_result = index.query(
+        vector=embeddedQuery,
+        top_k=5,
+        include_metadata=True,
+        filter={
+           "session_id": sessionId
+        }
+    )
 
-    # # Extract the relevant chunks
-    # relevant_chunks = [
-    #     {"pageContent": match["metadata"]["text"]}
-    #     for match in search_result["matches"]
-    # ]
+    # Extract the relevant chunks
+    relevant_chunks = [
+        {"pageContent": match["metadata"]["text"]}
+        for match in search_result["matches"]
+    ]
 
-    # print("Relevant Chunks >>>>>>>>>>>>>",relevant_chunks)
+    print("Relevant Chunks >>>>>>>>>>>>>",relevant_chunks)
 
-    # webSearchRouterPrompt = web_search_router_prompt(query , reverseMessages , relevant_chunks )
-    # response = model.generate_content(
-    #         webSearchRouterPrompt,
-    #         generation_config=GenerationConfig(
-    #             response_mime_type="application/json"
-    #         )
-    #     )
-    # print("response>>>>>>>>>>>>>>>>>>>>" , response.text)
-    # router_response = json.loads(response.text)
-    # doWebSearch = router_response["web_search"]
-    # print("doWebSearch>>>>>>>>>>>>>>>" , doWebSearch)
+    webSearchRouterPrompt = web_search_router_prompt(query , reverseMessages , relevant_chunks )
+    response = model.generate_content(
+            webSearchRouterPrompt,
+            generation_config=GenerationConfig(
+                response_mime_type="application/json"
+            )
+        )
+    print("response>>>>>>>>>>>>>>>>>>>>" , response.text)
+    router_response = json.loads(response.text)
+    doWebSearch = router_response["web_search"]
+    print("doWebSearch>>>>>>>>>>>>>>>" , doWebSearch)
 
-    # webSearchResponse = ""
-    # if doWebSearch :
-    #     prompt = rewrite_search_query_prompt(query , reverseMessages)
-    #     response = model.generate_content(prompt)
-    #     print("response>>>>>>>>>>>>>>>>>>" , response.text)
-    #     search_query  = response.text
-    #     print("search_query >>>>>>>>>>>>>" , search_query )
-    #     webSearch = await webScrape(search_query )
-    #     response_dict = json.loads(webSearch)
-    #     webSearchResponse = response_dict["answer"]
-    #     print("webSearchResponse>>>>>>>" , webSearchResponse)
+    webSearchResponse = ""
+    if doWebSearch :
+        prompt = rewrite_search_query_prompt(query , reverseMessages)
+        response = model.generate_content(prompt)
+        print("response>>>>>>>>>>>>>>>>>>" , response.text)
+        search_query  = response.text
+        print("search_query >>>>>>>>>>>>>" , search_query )
+        webSearch = await webScrape(search_query )
+        response_dict = json.loads(webSearch)
+        webSearchResponse = response_dict["answer"]
+        print("webSearchResponse>>>>>>>" , webSearchResponse)
 
-    # prompt = response_Generation_Prompt(query , reverseMessages , relevant_chunks , webSearchResponse)
-    # response = model.generate_content(prompt)
-    # print("response>>>>>>>>>>>>>>>>>>" , response.text)
-    # assistant_response = response.text
+    prompt = response_Generation_Prompt(query , reverseMessages , relevant_chunks , webSearchResponse)
+    response = model.generate_content(prompt)
+    print("response>>>>>>>>>>>>>>>>>>" , response.text)
+    assistant_response = response.text
 
-    # insert_query = """
-    # INSERT INTO chat_history(session_id, role, message)
-    # VALUES (%s, %s, %s)
-    # """
+    insert_query = """
+    INSERT INTO chat_history(session_id, role, message)
+    VALUES (%s, %s, %s)
+    """
 
-    # cur.execute(insert_query,(sessionId, "assistant", assistant_response))
+    cur.execute(insert_query,(sessionId, "assistant", assistant_response))
         
-    # conn.commit()
+    conn.commit()
 
-    # cur.close()
-    # conn.close()
-    # return {
-    #     "response": assistant_response
-    # }
+    cur.close()
+    conn.close()
     return {
-        "response": "Docker testing successful"
+        "response": assistant_response
     }
