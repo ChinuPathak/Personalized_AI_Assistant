@@ -60,8 +60,9 @@ interface ChatState {
         file: File
     ) => Promise<void>;
 
-    startVoiceRecording: (
-        userId: number
+    processVoiceRecording: (
+        userId: number,
+        audioBlob: Blob
     ) => Promise<void>;
 
     setSelectedFile: (
@@ -440,8 +441,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
     },
 
-    startVoiceRecording: async (
-        userId
+    processVoiceRecording: async (
+        userId,
+        audioBlob
     ) => {
 
         const session = get().currentSession;
@@ -451,14 +453,11 @@ export const useChatStore = create<ChatState>((set, get) => ({
         }
 
         set((state) => ({
-
             loading: {
                 ...state.loading,
                 voice: true,
             },
-
             error: null,
-
         }));
 
         try {
@@ -466,23 +465,23 @@ export const useChatStore = create<ChatState>((set, get) => ({
             const response =
                 await recordVoice(
                     userId,
-                    session.session_id
+                    session.session_id,
+                    audioBlob
                 );
 
             set((state) => ({
-
                 transcript: response.data,
 
                 loading: {
                     ...state.loading,
                     voice: false,
                 },
-
             }));
 
         } catch (error: unknown) {
 
-            let message = "Voice recording failed.";
+            let message =
+                "Voice processing failed.";
 
             if (axios.isAxiosError(error)) {
                 message =
@@ -491,19 +490,16 @@ export const useChatStore = create<ChatState>((set, get) => ({
             }
 
             set((state) => ({
-
                 error: message,
 
                 loading: {
                     ...state.loading,
                     voice: false,
                 },
-
             }));
 
             throw error;
         }
-
     },
 
     setSelectedFile: (file) => {

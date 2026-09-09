@@ -8,13 +8,12 @@ from google.generativeai.types import GenerationConfig
 import google.generativeai as genai
 from dotenv import load_dotenv
 import speech_recognition as sr
-import sounddevice as sd
-from scipy.io.wavfile import write
 import json
 import tempfile
 import fitz
 import docx
 import io
+import subprocess
 from bs4 import BeautifulSoup
 from urllib.parse import quote, urlparse, parse_qs, unquote
 import requests
@@ -298,43 +297,109 @@ def dataBasedOnSessionId(id : int):
     }
 
 @app.post("/voiceChat")
-def voiceChat():
-    r = sr.Recognizer()
+async def voiceChat(file: UploadFile = File(...)):
+    temp_webm = None
+    temp_wav = None
 
-    SAMPLE_RATE = 44100
-    DURATION = 10  # seconds
+    try:
+        # -----------------------------
+        # 1. Save uploaded audio
+        # -----------------------------
+        with tempfile.NamedTemporaryFile(
+            suffix=".webm",
+            delete=False
+        ) as temp:
+            temp_webm = temp.name
 
-    print("Listening...")
+            audio_data = await file.read()
+            temp.write(audio_data)
 
-    # Record audio
-    recording = sd.rec(
-        int(DURATION * SAMPLE_RATE),
-        samplerate=SAMPLE_RATE,
-        channels=1,
-        dtype='int16'
-    )
+        # -----------------------------
+        # 2. Convert WebM → WAV
+        # -----------------------------
+        temp_wav = tempfile.NamedTemporaryFile(
+            suffix=".wav",
+            delete=False
+        ).name
 
-    sd.wait()
+        subprocess.run(
+            [
+                "ffmpeg",
+                "-y",
+                "-i",
+                temp_webm,
+                "-ar",
+                "44100",
+                "-ac",
+                "1",
+                temp_wav,
+            ],
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
 
-    # Save temporary WAV file
-    temp_wav = tempfile.NamedTemporaryFile(suffix=".wav", delete=False)
-    write(temp_wav.name, SAMPLE_RATE, recording)
+        # -----------------------------
+        # 3. Speech-to-text
+        # -----------------------------
+        recognizer = sr.Recognizer()
 
-    # Read audio using SpeechRecognition
-    with sr.AudioFile(temp_wav.name) as source:
-        audio = r.record(source)
+        with sr.AudioFile(temp_wav) as source:
+            audio = recognizer.record(source)
 
-    # Convert speech to text
-    text = r.recognize_google(audio)
-    text = text.lower()
+        text = recognizer.recognize_google(audio)
 
-    print("You said:", text)
+        text = text.lower()
 
-    # i will just send this text to frontend and frontend will show this in the text area and then when i click send button then give to me.
-    return {
-        "message" : "Audio text stored in database",
-        "data" : text
-    }
+        print("You said:", text)
+
+        # -----------------------------
+        # 4. Send transcript to frontend
+        # -----------------------------
+        return {
+            "message": "Audio converted to text successfully",
+            "data": text
+        }
+
+    except sr.UnknownValueError:
+        raise HTTPException(
+            status_code=400,
+            detail="Could not understand the audio."
+        )
+
+    except sr.RequestError as e:
+        print("Speech recognition error:", e)
+
+        raise HTTPException(
+            status_code=500,
+            detail="Speech recognition service failed."
+        )
+
+    except subprocess.CalledProcessError as e:
+        print("FFmpeg error:", e)
+
+        raise HTTPException(
+            status_code=500,
+            detail="Could not process the audio file."
+        )
+
+    except Exception as e:
+        print("Voice processing error:", e)
+
+        raise HTTPException(
+            status_code=500,
+            detail="Voice processing failed."
+        )
+
+    finally:
+        # -----------------------------
+        # 5. Clean temporary files
+        # -----------------------------
+        if temp_webm and os.path.exists(temp_webm):
+            os.remove(temp_webm)
+
+        if temp_wav and os.path.exists(temp_wav):
+            os.remove(temp_wav)
 
 @app.post("/docUpload")
 async def docUpload(userId: int, sessionId: int , file: UploadFile = File(...)):
