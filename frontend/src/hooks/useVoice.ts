@@ -13,8 +13,8 @@ export const useVoice = () => {
         (state) => state.error
     );
 
-    const startVoiceRecording = useChatStore(
-        (state) => state.startVoiceRecording
+    const processVoiceRecording = useChatStore(
+        (state) => state.processVoiceRecording
     );
 
     const setTranscript = useChatStore(
@@ -29,7 +29,7 @@ export const useVoice = () => {
         transcript,
         loading,
         error,
-        startVoiceRecording,
+        processVoiceRecording,
         setTranscript,
         clearError,
     };

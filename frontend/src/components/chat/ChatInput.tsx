@@ -23,7 +23,7 @@ const ChatInput = () => {
         (state) => state.loading.upload
     );
 
-    const recording = useChatStore(
+    const processingVoice = useChatStore(
         (state) => state.loading.voice
     );
 
@@ -43,9 +43,15 @@ const ChatInput = () => {
         (state) => state.setSelectedFile
     );
 
-    const startVoiceRecording = useChatStore(
-        (state) => state.startVoiceRecording
+    const processVoiceRecording = useChatStore(
+        (state) => state.processVoiceRecording
     );
+
+    const [isRecording, setIsRecording] = useState(false);
+
+    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+
+    const audioChunksRef = useRef<Blob[]>([]); 
 
     const [message, setMessage] = useState("");
 
@@ -76,6 +82,87 @@ const ChatInput = () => {
 
         event.target.value = "";
     };
+
+    const handleStartRecording = async () => {
+    if (!user) return;
+
+    try {
+        const stream =
+            await navigator.mediaDevices.getUserMedia({
+                audio: true,
+            });
+
+        const mediaRecorder = new MediaRecorder(stream);
+
+        mediaRecorderRef.current = mediaRecorder;
+        audioChunksRef.current = [];
+
+        mediaRecorder.ondataavailable = (event) => {
+            if (event.data.size > 0) {
+                audioChunksRef.current.push(event.data);
+            }
+        };
+
+        mediaRecorder.start();
+
+        setIsRecording(true);
+
+    } catch (error) {
+        console.error(
+            "Unable to access microphone:",
+            error
+        );
+    }
+};
+
+const handleStopRecording = () => {
+    const mediaRecorder =
+        mediaRecorderRef.current;
+
+    if (!mediaRecorder) return;
+
+    mediaRecorder.onstop = async () => {
+        setIsRecording(false);
+
+        const audioBlob = new Blob(
+            audioChunksRef.current,
+            {
+                type:
+                    mediaRecorder.mimeType ||
+                    "audio/webm",
+            }
+        );
+
+        mediaRecorderRef.current = null;
+        audioChunksRef.current = [];
+
+        try {
+            await processVoiceRecording(
+                user!.user_id,
+                audioBlob
+            );
+
+            const transcript =
+                useChatStore.getState().transcript;
+
+            if (transcript) {
+                setMessage(transcript);
+            }
+
+        } catch (error) {
+            console.error(
+                "Voice processing failed:",
+                error
+            );
+        }
+    };
+
+    mediaRecorder.stop();
+
+    mediaRecorder.stream
+        .getTracks()
+        .forEach((track) => track.stop());
+};
 
     return (
         <div className="mx-auto w-full max-w-4xl px-6 py-4">
@@ -115,10 +202,16 @@ const ChatInput = () => {
                     )}
 
                     {/* Recording */}
-                    {recording && (
+                    {isRecording && (
                         <div className="flex items-center gap-2 px-5 pt-4 text-sm text-red-400 animate-pulse">
                             <Mic size={16} />
                             Recording...
+                        </div>
+                    )}
+
+                    {processingVoice && (
+                        <div className="px-5 pt-4 text-sm text-blue-400">
+                            Processing voice...
                         </div>
                     )}
 
@@ -160,20 +253,15 @@ const ChatInput = () => {
                                 <Button
                                     type="button"
                                     variant="secondary"
-                                    onClick={async () => {
-                                        if (!user) return;
-
-                                        await startVoiceRecording(user.user_id);
-
-                                        const transcript =
-                                            useChatStore.getState().transcript;
-
-                                        if (transcript) {
-                                            setMessage(transcript);
-                                        }
-                                    }}
-                                    disabled={loading}
-                                    className="h-10 w-10 rounded-full !p-0"
+                                    onClick={
+                                        isRecording
+                                            ? handleStopRecording
+                                            : handleStartRecording
+                                    }
+                                    disabled={loading || processingVoice}
+                                    className={`h-10 w-10 rounded-full !p-0 ${
+                                        isRecording ? "bg-red-600" : ""
+                                    }`}
                                 >
                                     <Mic className="text-white" size={18} />
                                 </Button>
