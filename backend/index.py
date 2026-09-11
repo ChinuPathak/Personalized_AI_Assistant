@@ -32,7 +32,7 @@ create_tables()
 
 secret_key = os.getenv("GEMINI_API_KEY")
 genai.configure(api_key = secret_key)
-model = genai.GenerativeModel("gemini-2.5-flash")
+model = genai.GenerativeModel("gemini-3.5-flash-lite")
 pinecone_api_key = os.getenv("PINECONE_API_KEY")
 pinecone_index = os.getenv("PINECONE_INDEX")
 pinecone_host = os.getenv("PINECONE_HOST")
